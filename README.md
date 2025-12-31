@@ -173,11 +173,22 @@ artist-system/
 
 ### 微信支付
 
-![微信支付](https://user-images.githubusercontent.com/xxx/xxx/wechat-pay.png)
+<p align="center">
+  <img src="./frontend/static/images/wechat-pay.png" alt="微信支付" width="300" />
+</p>
 
 ### 支付宝
 
-![支付宝](https://user-images.githubusercontent.com/xxx/xxx/alipay.png)
+<p align="center">
+  <img src="./frontend/static/images/alipay.png" alt="支付宝" width="300" />
+</p>
+
+### 说明
+
+1. 请将收款码图片保存到项目目录 `frontend/static/images/` 下
+2. 微信收款码命名为：`wechat-pay.png`
+3. 支付宝收款码命名为：`alipay.png`
+4. 图片尺寸建议：300x300像素
 
 您的支持是我们持续改进和更新的动力！感谢您的理解与支持！
 
