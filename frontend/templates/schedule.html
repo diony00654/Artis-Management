@@ -514,7 +514,12 @@
             container.innerHTML = '';
             
             if (scheduleData.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无行程数据</div>';
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.textAlign = 'center';
+                emptyDiv.style.padding = '40px';
+                emptyDiv.style.color = '#999';
+                emptyDiv.textContent = '暂无行程数据';
+                container.appendChild(emptyDiv);
                 return;
             }
             
@@ -670,7 +675,12 @@
             container.innerHTML = '';
             
             if (filteredData.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无符合条件的行程</div>';
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.textAlign = 'center';
+                emptyDiv.style.padding = '40px';
+                emptyDiv.style.color = '#999';
+                emptyDiv.textContent = '暂无符合条件的行程';
+                container.appendChild(emptyDiv);
                 return;
             }
             
