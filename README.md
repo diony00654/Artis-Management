@@ -1,6 +1,36 @@
-# 艺人信息系统部署指南
+# 艺人信息系统
 
-## 项目结构
+一个用于管理艺人、项目和活动信息的综合管理系统，支持行程管理、关联查询和数据统计等功能。
+
+## 🌟 功能特性
+
+### 核心功能
+- **艺人管理**：添加、编辑、删除艺人详细信息
+- **项目管理**：管理艺人参与的项目信息
+- **活动管理**：管理艺人参与的活动信息
+- **行程管理**：查看艺人行程日历，检测行程冲突
+- **关联管理**：管理艺人与项目、活动的关联关系
+- **用户管理**：管理系统用户和权限
+- **操作日志**：记录所有操作历史
+- **批量上传**：支持批量上传艺人信息
+- **搜索功能**：支持按多种条件搜索艺人、项目和活动
+
+### 行程管理增强
+- 月度行程日历视图
+- 行程冲突检测
+- 行程数据统计与分析
+
+## 🛠️ 技术栈
+
+- **后端框架**：Flask 3.0.0
+- **数据库**：MySQL 8.0 / MariaDB
+- **ORM**：MySQL Connector/Python
+- **前端**：HTML + JavaScript + CSS
+- **认证**：Flask Session + bcrypt
+- **部署**：统一管理脚本
+
+## 📁 项目结构
+
 ```
 artist-system/
 ├── backend/             # 后端代码
@@ -10,141 +40,136 @@ artist-system/
 │   ├── schema.sql       # 数据库表结构SQL
 │   └── uploads/         # 文件上传目录
 ├── frontend/            # 前端代码
+│   ├── static/          # 静态资源
 │   └── templates/       # HTML模板文件
+├── logs/                # 日志目录
 ├── requirements.txt     # Python依赖列表
-├── supervisor.conf      # Supervisor配置文件
-├── start.sh             # 启动脚本
-├── restart_service.sh   # 重启服务脚本
-├── manage_mariadb.sh    # 数据库管理脚本
-├── artis-syste.service  # Systemd服务配置
-├── non_docker_deploy.sh # 非Docker部署脚本
-└── README.md            # 部署指南
+├── manage.sh            # 统一管理脚本
+├── LICENSE              # 许可证文件
+└── README.md            # 项目说明文档
 ```
 
-## 部署方式
+## 🚀 快速开始
 
-### 非Docker部署
+### 环境要求
+- Python 3.8+
+- MySQL 8.0 / MariaDB
+- Linux 系统
 
-1. **连接到服务器**
+### 部署步骤
+
+1. **克隆项目**
    ```bash
-   ssh root@your-server-ip
+   git clone <your-repository-url>
+   cd artist-system
    ```
 
-2. **创建项目目录**
+2. **部署应用**
    ```bash
-   mkdir -p /root/artist-system
-   cd /root/artist-system
+   # 使用统一管理脚本进行部署
+   ./manage.sh deploy
    ```
 
-3. **上传项目文件**
-   从本地终端执行以下命令：
+3. **启动服务**
    ```bash
-   scp -r /path/to/artist-system/* root@your-server-ip:/root/artist-system/
-   ```
-
-4. **安装依赖**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **初始化数据库**
-   ```bash
-   # 执行数据库初始化脚本
-   mysql -u root -p < backend/init_user_table.sql
-   mysql -u root -p < backend/schema.sql
-   ```
-
-6. **启动服务**
-   ```bash
-   # 使用启动脚本
-   ./start.sh
+   # 启动应用和数据库
+   ./manage.sh start all
    
-   # 或者使用systemd服务
-   systemctl start artist-system
+   # 仅启动应用
+   ./manage.sh start
    ```
 
-7. **访问应用**
-   - 应用地址：http://your-server-ip:5000
+4. **访问应用**
+   - 应用地址：http://your-server-ip:15500
    - 登录账号：admin
    - 登录密码：justin00654
 
-## 服务管理
+## 📋 管理命令
 
-### 启动服务
+### 应用管理
 ```bash
-./start.sh
+# 启动应用
+./manage.sh start
+
+# 停止应用
+./manage.sh stop
+
+# 重启应用
+./manage.sh restart
+
+# 查看应用状态
+./manage.sh status
 ```
 
-### 停止服务
+### 数据库管理
 ```bash
-# 找到进程ID并终止
-pkill -f "python.*app.py"
+# 启动数据库
+./manage.sh db:start
+
+# 停止数据库
+./manage.sh db:stop
+
+# 重启数据库
+./manage.sh db:restart
+
+# 查看数据库状态
+./manage.sh db:status
 ```
 
-### 重启服务
+### 全服务管理
 ```bash
-./start.sh restart
+# 启动所有服务（应用+数据库）
+./manage.sh start all
+
+# 停止所有服务（应用+数据库）
+./manage.sh stop all
+
+# 重启所有服务（应用+数据库）
+./manage.sh restart all
+
+# 查看所有服务状态
+./manage.sh status all
 ```
 
-### 查看服务状态
+### 开机自启动
 ```bash
-./start.sh status
+# 配置开机自启动
+./manage.sh setup:boot
 ```
 
-## 数据库管理
+## 🔧 配置说明
 
-### 连接到数据库
-```bash
-mysql -u artist_user -ppassword -h 127.0.0.1 artist_system
-```
+### 数据库配置
+- 数据库名称：`artist_system`
+- 数据库用户：`artist_user`
+- 数据库密码：`password`
 
-### 查看数据库表结构
-```sql
-SHOW TABLES;
-DESCRIBE table_name;
-```
+### 端口配置
+- 默认端口：15500
+- 可通过环境变量 `DEPLOY_RUN_PORT` 修改
 
-### 查看数据
-```sql
-SELECT * FROM table_name;
-```
+## 📊 数据统计
 
-## 常见问题
+- 艺人工作量统计
+- 项目进度分析
+- 活动效果评估
+- 行程数据可视化
 
-1. **无法连接到服务器**
-   - 检查IP地址和端口号是否正确
-   - 检查服务器防火墙是否开放了相关端口
-   - 检查服务器的SSH服务是否运行
+## 📝 许可证
 
-2. **应用无法访问**
-   - 检查服务是否正在运行
-   - 检查服务器防火墙是否开放了5000端口
-   - 检查应用日志：`cat logs/app.log`
+本项目采用 [GNU General Public License v3.0](LICENSE) 许可证。
 
-3. **数据库连接失败**
-   - 检查数据库配置是否正确
-   - 检查数据库是否正在运行
-   - 检查数据库用户权限
+## 🤝 贡献
 
-## 技术栈
+欢迎提交 Issue 和 Pull Request 来帮助改进这个项目！
 
-- **后端框架**：Flask 3.0.0
-- **数据库**：MySQL 8.0
-- **ORM**：MySQL Connector/Python
-- **前端**：HTML + JavaScript + CSS
-- **认证**：Flask Session + bcrypt
+## 📧 联系方式
 
-## 功能特性
+如有问题，请联系项目维护者。
 
-1. **艺人管理**：添加、编辑、删除艺人信息
-2. **项目管理**：添加、编辑、删除项目信息
-3. **活动管理**：添加、编辑、删除活动信息
-4. **关联管理**：管理艺人与项目、活动的关联
-5. **用户管理**：管理系统用户和权限
-6. **操作日志**：记录所有操作历史
-7. **批量上传**：支持批量上传艺人信息
-8. **搜索功能**：支持按多种条件搜索艺人
+---
 
-## 联系方式
-
-如有问题，请联系系统管理员。
+**项目开发**: Dog&Clip
+**联系方式**: [微信] imdc9475 | [邮箱] justin00654@163.com
+**版本**: 0.1.4
+**最后更新**: 2026-01-01
