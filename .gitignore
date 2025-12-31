@@ -10,19 +10,12 @@ cookies.txt
 
 # Node.js依赖
 node_modules/
-package-lock.json
 
 # PID文件
 app.pid
 
 # 备份文件
 备份/
-
-# 迭代计划和维护日志
-迭代计划.md
-*.md
-!README.md
-!LICENSE
 
 # 服务配置文件
 *.service
@@ -39,23 +32,6 @@ auto_backup.sh
 create_backup.sh
 temp_backup.sh
 crontab.conf
-
-# 旧的管理脚本（已被manage.sh替代）
-*.sh
-!manage.sh
-
-# 环境特定目录
-.trae/
-
-# 测试文件
-test_local.sh
-test_smb_mount.sh
-
-# 类型定义目录
-types/
-
-# 组件目录
-components/
 
 # 开发环境配置
 .env
@@ -106,8 +82,13 @@ venv/
 .venv/
 env/
 
+# 测试文件
+test_local.sh
+test_smb_mount.sh
+
+# 环境特定目录
+.trae/
+
 # 其他
-*.log
-*.pid
 *.seed
 *.pid.lock
