@@ -18,6 +18,12 @@ app.pid
 # 备份文件
 备份/
 
+# 迭代计划和维护日志
+迭代计划.md
+*.md
+!README.md
+!LICENSE
+
 # 服务配置文件
 *.service
 supervisor.conf
@@ -33,6 +39,10 @@ auto_backup.sh
 create_backup.sh
 temp_backup.sh
 crontab.conf
+
+# 旧的管理脚本（已被manage.sh替代）
+*.sh
+!manage.sh
 
 # 环境特定目录
 .trae/
