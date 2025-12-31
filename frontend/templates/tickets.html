@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听潮阁-事业一部 - 工单管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* 筛选区域样式 */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            color: #657786;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* 工单表格样式 */
+        .tickets-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        th {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* 状态标签样式 */
+        .status-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-tag.待处理 {
+            background: #e1e8ed;
+            color: #657786;
+        }
+
+        .status-tag.处理中 {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-tag.已完成 {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-tag.已关闭 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-tag.已取消 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 优先级标签样式 */
+        .priority-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .priority-tag.低 {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .priority-tag.中 {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-tag.高 {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-tag.紧急 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 类型标签样式 */
+        .type-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-view {
+            background: #3742fa;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #2ed573;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 1000px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        /* 表单样式 */
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 工单详情样式 */
+        .ticket-detail-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .ticket-detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .ticket-detail-label {
+            width: 120px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .ticket-detail-value {
+            flex: 1;
+            color: #657786;
+        }
+
+        /* 评论样式 */
+        .comments-section {
+            margin-top: 30px;
+        }
+
+        .comments-list {
+            margin-bottom: 20px;
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .commenter-info {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        .comment-content {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* 操作日志样式 */
+        .logs-section {
+            margin-top: 30px;
+        }
+
+        .logs-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .log-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .log-operator {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .log-time {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        .log-content {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        /* 模态框底部按钮样式 */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e8ed;
+            position: sticky;
+            bottom: 0;
+            background: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>听潮阁-事业一部<br>工单管理系统</h1>
+        <a href="/" class="back-btn">返回首页</a>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索工单标题/编号...">
+            </div>
+            <div class="filter-section">
+                <!-- 工单筛选 -->
+                <div class="filter-group">
+                    <label>状态</label>
+                    <select id="statusFilter">
+                        <option value="">全部</option>
+                        <option value="待处理">待处理</option>
+                        <option value="处理中">处理中</option>
+                        <option value="已完成">已完成</option>
+                        <option value="已关闭">已关闭</option>
+                        <option value="已取消">已取消</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>优先级</label>
+                    <select id="priorityFilter">
+                        <option value="">全部</option>
+                        <option value="低">低</option>
+                        <option value="中">中</option>
+                        <option value="高">高</option>
+                        <option value="紧急">紧急</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>类型</label>
+                    <select id="typeFilter">
+                        <option value="">全部</option>
+                        <option value="沟通">沟通</option>
+                        <option value="对接">对接</option>
+                        <option value="投诉">投诉</option>
+                        <option value="需求">需求</option>
+                        <option value="问题">问题</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>指派人</label>
+                    <input type="text" id="assignedFilter" placeholder="请输入指派人">
+                </div>
+                <div class="filter-group">
+                    <label>创建日期</label>
+                    <input type="date" id="createdDateFilter">
+                </div>
+                <button class="btn btn-secondary" onclick="resetFilters()">重置筛选</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="openAddModal()">新增工单</button>
+                <button class="btn btn-info" onclick="openStatsModal()">统计看板</button>
+            </div>
+        </div>
+
+        <div class="tickets-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>操作</th>
+                        <th>工单编号</th>
+                        <th>标题</th>
+                        <th>艺人</th>
+                        <th>类型</th>
+                        <th>优先级</th>
+                        <th>状态</th>
+                        <th>创建人</th>
+                        <th>指派人</th>
+                        <th>创建时间</th>
+                        <th>截止日期</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsList">
+                </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🎫</div>
+                <h3>暂无工单数据</h3>
+                <p>点击"新增工单"按钮开始添加</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑工单模态框 -->
+    <div id="ticketModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">新增工单</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="ticketForm">
+                <input type="hidden" id="ticketId">
+
+                <div class="scrollable-content">
+                    <!-- 工单基本信息 -->
+                    <div class="form-section">
+                        <h3>工单基本信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="title">工单标题 *</label>
+                                <input type="text" id="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artistId">关联艺人 *</label>
+                                <select id="artistId" required>
+                                    <option value="">请选择艺人</option>
+                                    <!-- 动态填充艺人列表 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ticketType">工单类型</label>
+                                <select id="ticketType">
+                                    <option value="沟通">沟通</option>
+                                    <option value="对接">对接</option>
+                                    <option value="投诉">投诉</option>
+                                    <option value="需求">需求</option>
+                                    <option value="问题">问题</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="priority">优先级</label>
+                                <select id="priority">
+                                    <option value="低">低</option>
+                                    <option value="中">中</option>
+                                    <option value="高">高</option>
+                                    <option value="紧急">紧急</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="status">状态</label>
+                                <select id="status">
+                                    <option value="待处理">待处理</option>
+                                    <option value="处理中">处理中</option>
+                                    <option value="已完成">已完成</option>
+                                    <option value="已关闭">已关闭</option>
+                                    <option value="已取消">已取消</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignedTo">指派人</label>
+                                <select id="assignedTo">
+                                    <option value="">请选择指派人</option>
+                                    <!-- 动态填充用户列表 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dueDate">截止日期</label>
+                                <input type="datetime-local" id="dueDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="creatorId">创建人</label>
+                                <input type="text" id="creatorId" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 工单描述 -->
+                    <div class="form-section">
+                        <h3>工单描述</h3>
+                        <div class="form-group full-width">
+                            <textarea id="description" placeholder="请输入工单详细描述..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 附件 -->
+                    <div class="form-section">
+                        <h3>附件</h3>
+                        <div class="form-group">
+                            <input type="file" id="attachment" accept="*" multiple>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 工单详情模态框 -->
+    <div id="ticketDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detailTitle">工单详情</h2>
+                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="scrollable-content">
+                <!-- 工单基本信息 -->
+                <div class="ticket-detail-info">
+                    <h3>基本信息</h3>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">工单编号：</div>
+                        <div class="ticket-detail-value" id="detailTicketNo"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">标题：</div>
+                        <div class="ticket-detail-value" id="detailTitleValue"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">艺人：</div>
+                        <div class="ticket-detail-value" id="detailArtist"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">类型：</div>
+                        <div class="ticket-detail-value" id="detailType"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">优先级：</div>
+                        <div class="ticket-detail-value" id="detailPriority"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">状态：</div>
+                        <div class="ticket-detail-value" id="detailStatus"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">创建人：</div>
+                        <div class="ticket-detail-value" id="detailCreator"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">指派人：</div>
+                        <div class="ticket-detail-value" id="detailAssignedTo"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">创建时间：</div>
+                        <div class="ticket-detail-value" id="detailCreatedAt"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">截止日期：</div>
+                        <div class="ticket-detail-value" id="detailDueDate"></div>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <div class="ticket-detail-label">完成时间：</div>
+                        <div class="ticket-detail-value" id="detailCompletedAt"></div>
+                    </div>
+                </div>
+
+                <!-- 工单描述 -->
+                <div class="form-section">
+                    <h3>工单描述</h3>
+                    <div id="detailDescription" style="background: #f8f9fa; padding: 15px; border-radius: 8px;"></div>
+                </div>
+
+                <!-- 评论区 -->
+                <div class="comments-section">
+                    <h3>评论</h3>
+                    <div id="commentsList"></div>
+                    <div style="margin-top: 20px;">
+                        <textarea id="newComment" placeholder="添加评论..." style="width: 100%; padding: 10px; border: 1px solid #e1e8ed; border-radius: 6px; min-height: 80px;"></textarea>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                            <button class="btn btn-primary" onclick="addComment()">添加评论</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作日志 -->
+                <div class="logs-section">
+                    <h3>操作日志</h3>
+                    <div id="logsList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
+                <button type="button" class="btn btn-edit" onclick="openEditModal()">编辑</button>
+                <button type="button" class="btn btn-danger" onclick="deleteTicket()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计看板模态框 -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>工单统计看板</h2>
+                <button class="close-btn" onclick="closeStatsModal()">&times;</button>
+            </div>
+            <div class="scrollable-content">
+                <!-- 统计概览 -->
+                <div class="form-section">
+                    <h3>统计概览</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="background: #e3f2fd; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">0</div>
+                            <div style="color: #0c5460; margin-top: 5px;">总工单数</div>
+                        </div>
+                        <div style="background: #e1e8ed; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #657786;">0</div>
+                            <div style="color: #495057; margin-top: 5px;">待处理</div>
+                        </div>
+                        <div style="background: #d1ecf1; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #0c5460;">0</div>
+                            <div style="color: #0c5460; margin-top: 5px;">处理中</div>
+                        </div>
+                        <div style="background: #d4edda; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #155724;">0</div>
+                            <div style="color: #155724; margin-top: 5px;">已完成</div>
+                        </div>
+                        <div style="background: #f8d7da; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #721c24;">0</div>
+                            <div style="color: #721c24; margin-top: 5px;">已关闭</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 类型分布 -->
+                <div class="form-section">
+                    <h3>类型分布</h3>
+                    <div style="background: white; padding: 20px; border-radius: 12px;">
+                        <canvas id="typeChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- 优先级分布 -->
+                <div class="form-section">
+                    <h3>优先级分布</h3>
+                    <div style="background: white; padding: 20px; border-radius: 12px;">
+                        <canvas id="priorityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeStatsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 当前选中的工单ID
+        let currentTicketId = null;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取当前用户信息
+            fetch('/api/current-user')
+                .then(response => response.json())
+                .then(user => {
+                    // 设置创建人，使用用户昵称
+                    document.getElementById('creatorId').value = user.nickname || user.username;
+                    // 保存当前用户信息
+                    window.currentUser = user;
+                    // 加载艺人和工单数据
+                    loadArtists();
+                    loadUsers();
+                    loadTickets();
+                })
+                .catch(error => {
+                    console.error('获取用户信息失败:', error);
+                });
+
+            // 绑定搜索事件
+            document.getElementById('searchInput').addEventListener('input', loadTickets);
+            // 绑定筛选事件
+            document.getElementById('statusFilter').addEventListener('change', loadTickets);
+            document.getElementById('priorityFilter').addEventListener('change', loadTickets);
+            document.getElementById('typeFilter').addEventListener('change', loadTickets);
+            document.getElementById('assignedFilter').addEventListener('input', loadTickets);
+            document.getElementById('createdDateFilter').addEventListener('change', loadTickets);
+        });
+
+        // 加载艺人列表
+        function loadArtists() {
+            fetch('/api/artists')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('artistId');
+                        select.innerHTML = '<option value="">请选择艺人</option>';
+                        data.data.forEach(artist => {
+                            const option = document.createElement('option');
+                            option.value = artist.id;
+                            option.textContent = artist.name;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载艺人列表失败:', error);
+                });
+        }
+
+        // 加载用户列表
+        function loadUsers() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('assignedTo');
+                        select.innerHTML = '<option value="">请选择指派人</option>';
+                        data.data.forEach(user => {
+                            const option = document.createElement('option');
+                            option.value = user.nickname || user.username;
+                            option.textContent = user.nickname || user.username;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载用户列表失败:', error);
+                });
+        }
+
+        // 加载工单列表
+        function loadTickets() {
+            // 构建查询参数
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const priority = document.getElementById('priorityFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const assigned = document.getElementById('assignedFilter').value;
+            const createdDate = document.getElementById('createdDateFilter').value;
+
+            let url = '/api/tickets?';
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (status) url += `status=${encodeURIComponent(status)}&`;
+            if (priority) url += `priority=${encodeURIComponent(priority)}&`;
+            if (type) url += `type=${encodeURIComponent(type)}&`;
+            if (assigned) url += `assigned_to=${encodeURIComponent(assigned)}&`;
+            if (createdDate) url += `start_date=${encodeURIComponent(createdDate)}&end_date=${encodeURIComponent(createdDate)}&`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderTickets(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载工单列表失败:', error);
+                });
+        }
+
+        // 渲染工单列表
+        function renderTickets(tickets) {
+            const tbody = document.getElementById('ticketsList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (tickets.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+
+            tickets.forEach(ticket => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-view" onclick="viewTicket(${ticket.id})">查看</button>
+                            <button class="btn btn-edit" onclick="editTicket(${ticket.id})">编辑</button>
+                            <button class="btn btn-delete" onclick="confirmDeleteTicket(${ticket.id})">删除</button>
+                        </div>
+                    </td>
+                    <td>${ticket.ticket_no}</td>
+                    <td>${ticket.title}</td>
+                    <td>${ticket.artist_name || '未关联'}</td>
+                    <td><span class="type-tag">${ticket.ticket_type}</span></td>
+                    <td><span class="priority-tag ${ticket.priority}">${ticket.priority}</span></td>
+                    <td><span class="status-tag ${ticket.status}">${ticket.status}</span></td>
+                    <td>${ticket.creator_name || '未知'}</td>
+                    <td>${ticket.assigned_to || '未指派'}</td>
+                    <td>${new Date(ticket.created_at).toLocaleString()}</td>
+                    <td>${ticket.due_date ? new Date(ticket.due_date).toLocaleString() : '无'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 重置筛选
+        function resetFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('priorityFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('assignedFilter').value = '';
+            document.getElementById('createdDateFilter').value = '';
+            loadTickets();
+        }
+
+        // 打开新增工单模态框
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '新增工单';
+            document.getElementById('ticketForm').reset();
+            document.getElementById('ticketId').value = '';
+            // 重置后重新设置创建人信息
+            if (window.currentUser) {
+                document.getElementById('creatorId').value = window.currentUser.nickname || window.currentUser.username;
+            }
+            document.getElementById('ticketModal').classList.add('active');
+        }
+
+        // 打开编辑工单模态框
+        function openEditModal() {
+            document.getElementById('modalTitle').textContent = '编辑工单';
+            // 根据currentTicketId加载工单数据
+            fetch(`/api/tickets/${currentTicketId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const ticket = data.data;
+                        document.getElementById('ticketId').value = ticket.id;
+                        document.getElementById('title').value = ticket.title;
+                        document.getElementById('artistId').value = ticket.artist_id;
+                        document.getElementById('ticketType').value = ticket.ticket_type;
+                        document.getElementById('priority').value = ticket.priority;
+                        document.getElementById('status').value = ticket.status;
+                        document.getElementById('assignedTo').value = ticket.assigned_to;
+                        document.getElementById('dueDate').value = ticket.due_date ? new Date(ticket.due_date).toISOString().slice(0, 16) : '';
+                        document.getElementById('description').value = ticket.description;
+                        document.getElementById('creatorId').value = ticket.creator_id;
+                        document.getElementById('ticketModal').classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载工单详情失败:', error);
+                });
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('ticketModal').classList.remove('active');
+        }
+
+        // 提交工单表单
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const ticketId = document.getElementById('ticketId').value;
+            const url = ticketId ? `/api/tickets/${ticketId}` : '/api/tickets';
+            const method = ticketId ? 'PUT' : 'POST';
+
+            const data = {
+                title: document.getElementById('title').value,
+                artist_id: document.getElementById('artistId').value,
+                ticket_type: document.getElementById('ticketType').value,
+                priority: document.getElementById('priority').value,
+                status: document.getElementById('status').value,
+                creator_id: window.currentUser ? window.currentUser.id : document.getElementById('creatorId').value,
+                assigned_to: document.getElementById('assignedTo').value,
+                due_date: document.getElementById('dueDate').value,
+                description: document.getElementById('description').value
+            };
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeModal();
+                    loadTickets();
+                    alert('工单保存成功！');
+                } else {
+                    alert('工单保存失败：' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('保存工单失败:', error);
+                alert('保存工单失败，请重试！');
+            });
+        });
+
+        // 查看工单详情
+        function viewTicket(ticketId) {
+            currentTicketId = ticketId;
+            fetch(`/api/tickets/${ticketId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const ticket = data.data;
+                        document.getElementById('detailTitle').textContent = ticket.title;
+                        document.getElementById('detailTicketNo').textContent = ticket.ticket_no;
+                        document.getElementById('detailTitleValue').textContent = ticket.title;
+                        document.getElementById('detailArtist').textContent = ticket.artist ? ticket.artist.name : '未关联';
+                        document.getElementById('detailType').textContent = ticket.ticket_type;
+                        document.getElementById('detailPriority').innerHTML = `<span class="priority-tag ${ticket.priority}">${ticket.priority}</span>`;
+                        document.getElementById('detailStatus').innerHTML = `<span class="status-tag ${ticket.status}">${ticket.status}</span>`;
+                        document.getElementById('detailCreator').textContent = ticket.creator_name || '未知';
+                        document.getElementById('detailAssignedTo').textContent = ticket.assigned_to || '未指派';
+                        document.getElementById('detailCreatedAt').textContent = new Date(ticket.created_at).toLocaleString();
+                        document.getElementById('detailDueDate').textContent = ticket.due_date ? new Date(ticket.due_date).toLocaleString() : '无';
+                        document.getElementById('detailCompletedAt').textContent = ticket.completed_at ? new Date(ticket.completed_at).toLocaleString() : '无';
+                        document.getElementById('detailDescription').textContent = ticket.description || '无';
+                        
+                        // 加载评论
+                        loadComments(ticketId);
+                        // 加载操作日志
+                        loadLogs(ticketId);
+                        
+                        document.getElementById('ticketDetailModal').classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载工单详情失败:', error);
+                });
+        }
+
+        // 关闭详情模态框
+        function closeDetailModal() {
+            document.getElementById('ticketDetailModal').classList.remove('active');
+        }
+
+        // 编辑工单
+        function editTicket(ticketId) {
+            currentTicketId = ticketId;
+            openEditModal();
+        }
+
+        // 确认删除工单
+        function confirmDeleteTicket(ticketId) {
+            if (confirm('确定要删除这个工单吗？')) {
+                deleteTicketById(ticketId);
+            }
+        }
+
+        // 删除工单
+        function deleteTicket() {
+            if (confirm('确定要删除这个工单吗？')) {
+                deleteTicketById(currentTicketId);
+            }
+        }
+
+        // 根据ID删除工单
+        function deleteTicketById(ticketId) {
+            fetch(`/api/tickets/${ticketId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeDetailModal();
+                    loadTickets();
+                    alert('工单删除成功！');
+                } else {
+                    alert('工单删除失败：' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('删除工单失败:', error);
+                alert('删除工单失败，请重试！');
+            });
+        }
+
+        // 加载评论
+        function loadComments(ticketId) {
+            fetch(`/api/tickets/${ticketId}/comments`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const commentsList = document.getElementById('commentsList');
+                        if (data.data.length === 0) {
+                            commentsList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">暂无评论</div>';
+                        } else {
+                            commentsList.innerHTML = '';
+                            data.data.forEach(comment => {
+                                const commentItem = document.createElement('div');
+                                commentItem.className = 'comment-item';
+                                commentItem.innerHTML = `
+                                    <div class="comment-header">
+                                        <div class="commenter-info">${comment.commenter_name}</div>
+                                        <div class="comment-time">${new Date(comment.created_at).toLocaleString()}</div>
+                                    </div>
+                                    <div class="comment-content">${comment.content}</div>
+                                `;
+                                commentsList.appendChild(commentItem);
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载评论失败:', error);
+                });
+        }
+
+        // 添加评论
+        function addComment() {
+            const content = document.getElementById('newComment').value.trim();
+            if (!content) {
+                alert('评论内容不能为空！');
+                return;
+            }
+
+            fetch(`/api/tickets/${currentTicketId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    document.getElementById('newComment').value = '';
+                    loadComments(currentTicketId);
+                    loadLogs(currentTicketId);
+                    alert('评论添加成功！');
+                } else {
+                    alert('评论添加失败：' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('添加评论失败:', error);
+                alert('添加评论失败，请重试！');
+            });
+        }
+
+        // 加载操作日志
+        function loadLogs(ticketId) {
+            fetch(`/api/tickets/${ticketId}/logs`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const logsList = document.getElementById('logsList');
+                        if (data.data.length === 0) {
+                            logsList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">暂无操作日志</div>';
+                        } else {
+                            logsList.innerHTML = '';
+                            data.data.forEach(log => {
+                                const logItem = document.createElement('div');
+                                logItem.className = 'log-item';
+                                logItem.innerHTML = `
+                                    <div class="log-header">
+                                        <div class="log-operator">${log.operator_name}</div>
+                                        <div class="log-time">${new Date(log.created_at).toLocaleString()}</div>
+                                    </div>
+                                    <div class="log-content">
+                                        ${log.action === 'created' ? '创建了工单' : 
+                                          log.action === 'updated' ? 
+                                            log.field_changed ? `更新了${log.field_changed}：从"${log.old_value}"变更为"${log.new_value}"` : '更新了工单信息' :
+                                          log.action === 'assigned' ? `将工单指派给${log.new_value}` :
+                                          log.action === 'commented' ? '添加了评论' :
+                                          log.action === 'completed' ? '将工单标记为已完成' :
+                                          log.action === 'closed' ? '将工单标记为已关闭' : log.action}
+                                    </div>
+                                `;
+                                logsList.appendChild(logItem);
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载操作日志失败:', error);
+                });
+        }
+
+        // 打开统计看板
+        function openStatsModal() {
+            document.getElementById('statsModal').classList.add('active');
+            // 加载统计数据
+            loadStats();
+        }
+
+        // 关闭统计看板
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.remove('active');
+        }
+
+        // 加载统计数据
+        function loadStats() {
+            fetch('/api/tickets/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 更新统计概览
+                        updateStatsOverview(data.data);
+                        // 更新图表
+                        updateCharts(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载统计数据失败:', error);
+                });
+        }
+
+        // 更新统计概览
+        function updateStatsOverview(stats) {
+            // 更新总工单数
+            document.querySelector('.scrollable-content .form-section:nth-child(1) .ticket-detail-value:nth-child(2)').textContent = stats.total;
+            
+            // 更新状态统计
+            const statusStats = stats.status;
+            statusStats.forEach(stat => {
+                const statusElement = document.querySelector(`.scrollable-content .form-section:nth-child(1) .ticket-detail-value:nth-child(${getStatIndex(stat.status)})`);
+                if (statusElement) {
+                    statusElement.textContent = stat.count;
+                }
+            });
+        }
+
+        // 获取状态统计索引
+        function getStatIndex(status) {
+            switch(status) {
+                case '待处理': return 4;
+                case '处理中': return 6;
+                case '已完成': return 8;
+                case '已关闭': return 10;
+                default: return null;
+            }
+        }
+
+        // 更新图表
+        function updateCharts(stats) {
+            // 类型分布图表
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            // 优先级分布图表
+            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            
+            // 这里使用简单的柱状图，实际项目中可以使用Chart.js等库
+            drawBarChart(typeCtx, stats.type, '类型分布', ['类型', '数量']);
+            drawBarChart(priorityCtx, stats.priority, '优先级分布', ['优先级', '数量']);
+        }
+
+        // 绘制柱状图
+        function drawBarChart(ctx, data, title, labels) {
+            // 清除画布
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            
+            // 简单的柱状图绘制
+            const barWidth = 50;
+            const spacing = 20;
+            const startX = 50;
+            const startY = 50;
+            const chartWidth = ctx.canvas.width - 100;
+            const chartHeight = ctx.canvas.height - 100;
+            
+            // 绘制标题
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, ctx.canvas.width / 2, 25);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + chartHeight);
+            ctx.lineTo(startX + chartWidth, startY + chartHeight);
+            ctx.stroke();
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX, startY + chartHeight);
+            ctx.stroke();
+            
+            // 绘制数据
+            const maxValue = Math.max(...data.map(item => item.count));
+            const barHeightFactor = chartHeight / maxValue;
+            
+            data.forEach((item, index) => {
+                const x = startX + index * (barWidth + spacing) + spacing;
+                const barHeight = item.count * barHeightFactor;
+                const y = startY + chartHeight - barHeight;
+                
+                // 绘制柱子
+                ctx.fillStyle = '#667eea';
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // 绘制标签
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.ticket_type || item.priority, x + barWidth / 2, startY + chartHeight + 20);
+                
+                // 绘制数值
+                ctx.fillText(item.count, x + barWidth / 2, y - 5);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关联管理组件演示</title>
+    <link rel="stylesheet" href="/static/relation-manager.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        
+        .demo-section h2 {
+            color: #34495e;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .demo-buttons button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.3s;
+        }
+        
+        .demo-buttons button:hover {
+            background: #5a6fd8;
+        }
+        
+        .result-display {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+        
+        .result-display h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        #selectedResult {
+            background: #f8fafc;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 50px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>关联管理组件演示</h1>
+        
+        <!-- 项目关联演示 -->
+        <div class="demo-section">
+            <h2>项目关联管理</h2>
+            <div id="project-manager"></div>
+        </div>
+        
+        <!-- 活动关联演示 -->
+        <div class="demo-section">
+            <h2>活动关联管理</h2>
+            <div id="activity-manager"></div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="demo-buttons">
+            <button onclick="showSelectedItems()">显示已选择的项目</button>
+            <button onclick="clearAll()">清空所有选择</button>
+        </div>
+        
+        <!-- 结果显示 -->
+        <div class="result-display">
+            <h3>选择结果</h3>
+            <div id="selectedResult">暂无选择</div>
+        </div>
+    </div>
+    
+    <!-- 引入RelationManager组件脚本 -->
+    <script src="/static/relation-manager.js"></script>
+    
+    <script>
+        // 初始化项目关联管理器
+        window.relationManager.project = new RelationManager({
+            type: 'project',
+            container: document.getElementById('project-manager'),
+            onChange: function(items) {
+                console.log('项目关联变化:', items);
+            },
+            apiConfig: {
+                searchEndpoint: '/api/projects'
+            }
+        });
+        
+        // 初始化活动关联管理器
+        window.relationManager.activity = new RelationManager({
+            type: 'activity',
+            container: document.getElementById('activity-manager'),
+            onChange: function(items) {
+                console.log('活动关联变化:', items);
+            },
+            apiConfig: {
+                searchEndpoint: '/api/activities'
+            }
+        });
+        
+        // 显示已选择的项目
+        function showSelectedItems() {
+            const selectedProjects = window.relationManager.project.getSelected();
+            const selectedActivities = window.relationManager.activity.getSelected();
+            
+            const result = {
+                projects: selectedProjects,
+                activities: selectedActivities
+            };
+            
+            document.getElementById('selectedResult').textContent = JSON.stringify(result, null, 2);
+        }
+        
+        // 清空所有选择
+        function clearAll() {
+            window.relationManager.project.clear();
+            window.relationManager.activity.clear();
+            document.getElementById('selectedResult').textContent = '暂无选择';
+        }
+    </script>
+    
+    <!-- 页脚信息 -->
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+    <div class="footer">
+        Project Development: Dog&Clip 联系方式：【微信 imdc9475；电子邮箱 justin00654@163.com】
+    </div>
+</body>
+</html>

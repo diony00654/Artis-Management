@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听潮阁-事业一部 - 行程管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #e1e8ed;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .content-tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 行程列表样式 */
+        .schedule-list {
+            margin-top: 20px;
+        }
+
+        .schedule-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+        }
+
+        .schedule-item.conflict {
+            border-left-color: #ff4757;
+            background: #fff5f5;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .schedule-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .schedule-type {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .schedule-time {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .schedule-artist {
+            background: #f0f4f8;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* 日历样式 */
+        .calendar-container {
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calendar-day {
+            background: #f0f4f8;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-day.today {
+            background: #e8f0fe;
+            border: 2px solid #667eea;
+        }
+
+        .day-header {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .calendar-schedule {
+            background: #667eea;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .calendar-schedule.conflict {
+            background: #ff4757;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .calendar {
+                gap: 5px;
+            }
+
+            .calendar-day {
+                padding: 10px;
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-btn">返回首页</a>
+        <h1>行程管理</h1>
+        <div></div>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索艺人行程...">
+            </div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="artistSelect">艺人</label>
+                    <select id="artistSelect">
+                        <option value="">全部艺人</option>
+                        <!-- 艺人选项将通过JavaScript动态加载 -->
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="scheduleType">类型</label>
+                    <select id="scheduleType">
+                        <option value="">全部类型</option>
+                        <option value="project">项目</option>
+                        <option value="activity">活动</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="statusSelect">状态</label>
+                    <select id="statusSelect">
+                        <option value="">全部状态</option>
+                        <option value="upcoming">即将开始</option>
+                        <option value="ongoing">进行中</option>
+                        <option value="completed">已完成</option>
+                        <option value="conflict">存在冲突</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-tabs">
+            <button class="tab active" onclick="switchTab('list')">行程列表</button>
+            <button class="tab" onclick="switchTab('calendar')">月度日历</button>
+        </div>
+
+        <!-- 行程列表视图 -->
+        <div id="list" class="tab-content active">
+            <h2>艺人行程列表</h2>
+            <div id="scheduleList" class="schedule-list">
+                <!-- 行程列表将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <!-- 月度日历视图 -->
+        <div id="calendar" class="tab-content">
+            <div class="calendar-header">
+                <div class="calendar-title" id="calendarTitle">2025年12月</div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" onclick="changeMonth(-1)">上一月</button>
+                    <button class="nav-btn" onclick="changeMonth(1)">下一月</button>
+                    <button class="nav-btn" onclick="goToToday()">今天</button>
+                </div>
+            </div>
+            <div id="calendarContent" class="calendar">
+                <!-- 日历内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚信息 -->
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+    <div class="footer">
+        Project Development: Dog&Clip 联系方式：【微信 imdc9475；电子邮箱 justin00654@163.com】
+    </div>
+
+    <script>
+        // 当前激活的标签页
+        let currentTab = 'list';
+        // 当前显示的年月
+        let currentDate = new Date();
+        // 行程数据
+        let scheduleData = [];
+        // 艺人列表
+        let artistList = [];
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArtists();
+            loadScheduleData();
+            initializeCalendar();
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            // 更新标签样式
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            currentTab = tabName;
+            
+            // 如果切换到日历标签，初始化日历
+            if (tabName === 'calendar') {
+                initializeCalendar();
+            }
+        }
+
+        // 加载艺人列表
+        async function loadArtists() {
+            try {
+                const response = await fetch('/api/artists');
+                const result = await response.json();
+                if (result.success) {
+                    artistList = result.data;
+                    populateArtistSelect();
+                }
+            } catch (error) {
+                console.error('加载艺人列表失败:', error);
+            }
+        }
+
+        // 填充艺人选择框
+        function populateArtistSelect() {
+            const select = document.getElementById('artistSelect');
+            select.innerHTML = '<option value="">全部艺人</option>';
+            
+            artistList.forEach(artist => {
+                const option = document.createElement('option');
+                option.value = artist.id;
+                option.textContent = artist.name;
+                select.appendChild(option);
+            });
+        }
+
+        // 加载行程数据
+        async function loadScheduleData() {
+            try {
+                const response = await fetch('/api/schedule/monthly');
+                const result = await response.json();
+                if (result.success) {
+                    scheduleData = result.data;
+                    renderScheduleList();
+                    if (currentTab === 'calendar') {
+                        initializeCalendar();
+                    }
+                }
+            } catch (error) {
+                console.error('加载行程数据失败:', error);
+            }
+        }
+
+        // 渲染行程列表
+        function renderScheduleList() {
+            const container = document.getElementById('scheduleList');
+            container.innerHTML = '';
+            
+            if (scheduleData.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无行程数据</div>';
+                return;
+            }
+            
+            scheduleData.forEach(item => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'schedule-item' + (item.has_conflict ? ' conflict' : '');
+                
+                const typeText = item.type === 'project' ? '项目' : '活动';
+                const typeColor = item.type === 'project' ? '#667eea' : '#4facfe';
+                
+                scheduleItem.innerHTML = '<div class="schedule-header"><div class="schedule-title">' + item.title + '</div><div class="schedule-type" style="background: ' + typeColor + '">' + typeText + '</div></div><div class="schedule-time">' + item.start_time + ' 至 ' + item.end_time + '</div><div class="schedule-artist">' + item.artist_name + '</div>';
+                
+                container.appendChild(scheduleItem);
+            });
+        }
+
+        // 初始化日历
+        function initializeCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // 更新日历标题
+            document.getElementById('calendarTitle').textContent = year + '年' + (month + 1) + '月';
+            
+            // 生成日历
+            generateCalendar(year, month);
+        }
+
+        // 生成日历
+        function generateCalendar(year, month) {
+            const container = document.getElementById('calendarContent');
+            container.innerHTML = '';
+            
+            // 星期标题
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekdays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day';
+                dayHeader.innerHTML = '<div class="day-header">' + day + '</div>';
+                container.appendChild(dayHeader);
+            });
+            
+            // 获取当月第一天和最后一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            // 填充前面的空白
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                container.appendChild(emptyDay);
+            }
+            
+            // 填充日期
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = new Date(year, month, day);
+                const calendarDay = document.createElement('div');
+                calendarDay.className = 'calendar-day' + (isToday(date) ? ' today' : '');
+                
+                // 获取当天的行程
+                const daySchedule = getScheduleForDay(date);
+                
+                let scheduleHtml = '';
+                if (daySchedule.length > 0) {
+                    scheduleHtml = daySchedule.map(schedule => {
+                        return '<div class="calendar-schedule' + (schedule.has_conflict ? ' conflict' : '') + '">' + schedule.title + '</div>';
+                    }).join('');
+                }
+                
+                calendarDay.innerHTML = '<div class="day-number">' + day + '</div>' + scheduleHtml;
+                
+                container.appendChild(calendarDay);
+            }
+        }
+
+        // 获取某天的行程
+        function getScheduleForDay(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            return scheduleData.filter(item => {
+                const startDate = item.start_time.split(' ')[0];
+                const endDate = item.end_time.split(' ')[0];
+                return startDate <= dateStr && endDate >= dateStr;
+            });
+        }
+
+        // 检查是否是今天
+        function isToday(date) {
+            const today = new Date();
+            return date.getFullYear() === today.getFullYear() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getDate() === today.getDate();
+        }
+
+        // 切换月份
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            initializeCalendar();
+        }
+
+        // 回到今天
+        function goToToday() {
+            currentDate = new Date();
+            initializeCalendar();
+        }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filterSchedule(searchTerm);
+        });
+
+        // 筛选功能
+        document.querySelectorAll('#artistSelect, #scheduleType, #statusSelect').forEach(select => {
+            select.addEventListener('change', function() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                filterSchedule(searchTerm);
+            });
+        });
+
+        // 筛选行程
+        function filterSchedule(searchTerm) {
+            const artistId = document.getElementById('artistSelect').value;
+            const scheduleType = document.getElementById('scheduleType').value;
+            const status = document.getElementById('statusSelect').value;
+            
+            let filteredData = scheduleData;
+            
+            // 按搜索词筛选
+            if (searchTerm) {
+                filteredData = filteredData.filter(item => 
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.artist_name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 按艺人筛选
+            if (artistId) {
+                filteredData = filteredData.filter(item => item.artist_id == artistId);
+            }
+            
+            // 按类型筛选
+            if (scheduleType) {
+                filteredData = filteredData.filter(item => item.type === scheduleType);
+            }
+            
+            // 按状态筛选
+            if (status === 'conflict') {
+                filteredData = filteredData.filter(item => item.has_conflict);
+            }
+            
+            // 渲染筛选后的行程
+            const container = document.getElementById('scheduleList');
+            container.innerHTML = '';
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无符合条件的行程</div>';
+                return;
+            }
+            
+            filteredData.forEach(item => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'schedule-item' + (item.has_conflict ? ' conflict' : '');
+                
+                const typeText = item.type === 'project' ? '项目' : '活动';
+                const typeColor = item.type === 'project' ? '#667eea' : '#4facfe';
+                
+                scheduleItem.innerHTML = '<div class="schedule-header"><div class="schedule-title">' + item.title + '</div><div class="schedule-type" style="background: ' + typeColor + '">' + typeText + '</div></div><div class="schedule-time">' + item.start_time + ' 至 ' + item.end_time + '</div><div class="schedule-artist">' + item.artist_name + '</div>';
+                
+                container.appendChild(scheduleItem);
+            });
+        }
+    </script>
+</body>
+</html>

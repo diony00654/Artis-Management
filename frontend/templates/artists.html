@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听潮阁-事业一部 - 艺人信息系统</title>
+    <!-- 引入RelationManager组件样式 -->
+    <link rel="stylesheet" href="/static/relation-manager.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* 筛选区域样式 */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            color: #657786;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .range-inputs input {
+            width: 80px;
+        }
+
+        .range-inputs span {
+            color: #657786;
+            font-size: 0.9rem;
+        }
+
+        /* 操作日志样式 */
+        .logs-container {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .operation-logs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .log-operator {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .log-time {
+            font-size: 0.85rem;
+            color: #657786;
+        }
+
+        .log-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .log-type.新增 {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .log-type.修改 {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .log-type.删除 {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .log-content {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            color: #657786;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .no-logs {
+            text-align: center;
+            color: #657786;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff6b81;
+        }
+
+        .btn-edit {
+            background: #2ed573;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-view {
+            background: #3742fa;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* 跟进记录时间线样式 */
+        .follow-up-timeline {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 25px;
+            padding-bottom: 12px;
+            padding-top: 8px;
+            border-left: 2px solid #667eea;
+            margin-left: 8px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+        .timeline-operator {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+
+        .timeline-text {
+            color: #333;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .timeline-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .timeline-edit-btn {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.8rem;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .timeline-edit-btn:hover {
+            text-decoration: underline;
+        }
+
+        .timeline-delete {
+            float: right;
+            color: #ff4757;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .add-follow-up-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .add-follow-up-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .add-follow-up-form button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .add-follow-up-form button:hover {
+            background: #5568d3;
+        }
+
+        .artists-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            overflow-x: auto;
+            /* 确保水平滚动条始终显示 */
+            scrollbar-width: thin;
+            scrollbar-color: #c1c8cd transparent;
+            /* 针对MacOS强制显示滚动条 */
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 全局强制显示滚动条（针对MacOS的WebKit浏览器） */
+        .artists-table {
+            /* 强制显示滚动条，不自动隐藏 */
+            scrollbar-gutter: stable both-edges;
+        }
+        
+        /* WebKit浏览器（Chrome, Safari） */
+        .artists-table::-webkit-scrollbar {
+            height: 8px;
+            /* 强制显示滚动条宽度 */
+            display: block !important;
+        }
+        
+        .artists-table::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 4px;
+        }
+        
+        .artists-table::-webkit-scrollbar-thumb {
+            background: #c1c8cd;
+            border-radius: 4px;
+        }
+        
+        .artists-table::-webkit-scrollbar-thumb:hover {
+            background: #a8b2bc;
+        }
+        
+        /* 确保表格容器始终显示滚动条区域 */
+        .artists-table {
+            min-height: calc(100% + 8px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 2000px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        th {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group.half-width {
+            grid-column: span 1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e8ed;
+            position: sticky;
+            bottom: 0;
+            background: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e1e8ed;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #2c3e50;
+            margin-right: 3px;
+        }
+
+        .scrollable-content {
+            max-height: calc(90vh - 150px);
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>听潮阁-事业一部<br>艺人管理系统</h1>
+        <a href="/" class="back-btn">返回首页</a>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索艺人姓名/抖音号...">
+            </div>
+            <div class="filter-section">
+                <!-- 基本信息筛选 -->
+                <div class="filter-group">
+                    <label>当前状态</label>
+                    <select id="statusFilter">
+                        <option value="">全部</option>
+                        <option value="活跃">活跃</option>
+                        <option value="休息">休息</option>
+                        <option value="暂停">暂停</option>
+                        <option value="解约">解约</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>签约类型</label>
+                    <select id="contractTypeFilter">
+                        <option value="">全部</option>
+                        <option value="独家签约">独家签约</option>
+                        <option value="非独家">非独家</option>
+                        <option value="兼职">兼职</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>性别</label>
+                    <select id="genderFilter">
+                        <option value="">全部</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>民族</label>
+                    <select id="ethnicityFilter">
+                        <option value="">全部</option>
+                        <option value="汉族">汉族</option>
+                        <option value="蒙古族">蒙古族</option>
+                        <option value="回族">回族</option>
+                        <option value="藏族">藏族</option>
+                        <option value="维吾尔族">维吾尔族</option>
+                        <option value="苗族">苗族</option>
+                        <option value="彝族">彝族</option>
+                        <option value="壮族">壮族</option>
+                        <option value="布依族">布依族</option>
+                        <option value="朝鲜族">朝鲜族</option>
+                        <option value="满族">满族</option>
+                        <option value="侗族">侗族</option>
+                        <option value="瑶族">瑶族</option>
+                        <option value="白族">白族</option>
+                        <option value="土家族">土家族</option>
+                        <option value="哈尼族">哈尼族</option>
+                        <option value="哈萨克族">哈萨克族</option>
+                        <option value="傣族">傣族</option>
+                        <option value="黎族">黎族</option>
+                        <option value="傈僳族">傈僳族</option>
+                        <option value="佤族">佤族</option>
+                        <option value="畲族">畲族</option>
+                        <option value="高山族">高山族</option>
+                        <option value="拉祜族">拉祜族</option>
+                        <option value="水族">水族</option>
+                        <option value="东乡族">东乡族</option>
+                        <option value="纳西族">纳西族</option>
+                        <option value="景颇族">景颇族</option>
+                        <option value="柯尔克孜族">柯尔克孜族</option>
+                        <option value="土族">土族</option>
+                        <option value="达斡尔族">达斡尔族</option>
+                        <option value="仫佬族">仫佬族</option>
+                        <option value="羌族">羌族</option>
+                        <option value="布朗族">布朗族</option>
+                        <option value="撒拉族">撒拉族</option>
+                        <option value="毛南族">毛南族</option>
+                        <option value="仡佬族">仡佬族</option>
+                        <option value="锡伯族">锡伯族</option>
+                        <option value="阿昌族">阿昌族</option>
+                        <option value="普米族">普米族</option>
+                        <option value="塔吉克族">塔吉克族</option>
+                        <option value="怒族">怒族</option>
+                        <option value="乌孜别克族">乌孜别克族</option>
+                        <option value="俄罗斯族">俄罗斯族</option>
+                        <option value="鄂温克族">鄂温克族</option>
+                        <option value="德昂族">德昂族</option>
+                        <option value="保安族">保安族</option>
+                        <option value="裕固族">裕固族</option>
+                        <option value="京族">京族</option>
+                        <option value="塔塔尔族">塔塔尔族</option>
+                        <option value="独龙族">独龙族</option>
+                        <option value="鄂伦春族">鄂伦春族</option>
+                        <option value="赫哲族">赫哲族</option>
+                        <option value="门巴族">门巴族</option>
+                        <option value="珞巴族">珞巴族</option>
+                        <option value="基诺族">基诺族</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>唱功</label>
+                    <select id="vocalSkillFilter">
+                        <option value="">全部</option>
+                        <option value="专业">专业</option>
+                        <option value="优秀">优秀</option>
+                        <option value="良好">良好</option>
+                        <option value="一般">一般</option>
+                        <option value="入门">入门</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>直播效果等级</label>
+                    <select id="liveEffectFilter">
+                        <option value="">全部</option>
+                        <option value="S级">S级</option>
+                        <option value="A级">A级</option>
+                        <option value="B级">B级</option>
+                        <option value="C级">C级</option>
+                        <option value="D级">D级</option>
+                    </select>
+                </div>
+                
+                <!-- 职业信息筛选 -->
+                <div class="filter-group">
+                    <label>职业</label>
+                    <select id="occupationFilter">
+                        <option value="">全部</option>
+                        <option value="歌手">歌手</option>
+                        <option value="主播">主播</option>
+                        <option value="演员">演员</option>
+                        <option value="舞者">舞者</option>
+                        <option value="模特">模特</option>
+                        <option value="主持人">主持人</option>
+                        <option value="音乐人">音乐人</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>曲风</label>
+                    <select id="musicStyleFilter">
+                        <option value="">全部</option>
+                        <option value="流行">流行</option>
+                        <option value="摇滚">摇滚</option>
+                        <option value="民谣">民谣</option>
+                        <option value="电子">电子</option>
+                        <option value="嘻哈">嘻哈</option>
+                        <option value="古典">古典</option>
+                        <option value="爵士">爵士</option>
+                        <option value="R&B">R&B</option>
+                        <option value="乡村">乡村</option>
+                        <option value="古风">古风</option>
+                        <option value="金属">金属</option>
+                        <option value="蓝调">蓝调</option>
+                        <option value="雷鬼">雷鬼</option>
+                        <option value="朋克">朋克</option>
+                        <option value="拉丁">拉丁</option>
+                    </select>
+                </div>
+                
+                <!-- 个人信息筛选 -->
+                <div class="filter-group">
+                    <label>MBTI</label>
+                    <select id="mbtiFilter">
+                        <option value="">全部</option>
+                        <option value="ISTJ">ISTJ</option>
+                        <option value="ISFJ">ISFJ</option>
+                        <option value="INFJ">INFJ</option>
+                        <option value="INTJ">INTJ</option>
+                        <option value="ISTP">ISTP</option>
+                        <option value="ISFP">ISFP</option>
+                        <option value="INFP">INFP</option>
+                        <option value="INTP">INTP</option>
+                        <option value="ESTP">ESTP</option>
+                        <option value="ESFP">ESFP</option>
+                        <option value="ENFP">ENFP</option>
+                        <option value="ENTP">ENTP</option>
+                        <option value="ESTJ">ESTJ</option>
+                        <option value="ESFJ">ESFJ</option>
+                        <option value="ENFJ">ENFJ</option>
+                        <option value="ENTJ">ENTJ</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>感情情况</label>
+                    <select id="relationshipFilter">
+                        <option value="">全部</option>
+                        <option value="单身">单身</option>
+                        <option value="恋爱中">恋爱中</option>
+                        <option value="已婚">已婚</option>
+                        <option value="离异">离异</option>
+                        <option value="丧偶">丧偶</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>性格</label>
+                    <select id="personalityFilter">
+                        <option value="">全部</option>
+                        <option value="开朗">开朗</option>
+                        <option value="内向">内向</option>
+                        <option value="活泼">活泼</option>
+                        <option value="沉稳">沉稳</option>
+                        <option value="热情">热情</option>
+                        <option value="冷静">冷静</option>
+                        <option value="幽默">幽默</option>
+                        <option value="严肃">严肃</option>
+                        <option value="温柔">温柔</option>
+                        <option value="强势">强势</option>
+                        <option value="细腻">细腻</option>
+                        <option value="豪爽">豪爽</option>
+                        <option value="敏感">敏感</option>
+                        <option value="大大咧咧">大大咧咧</option>
+                        <option value="安静">安静</option>
+                        <option value="外向">外向</option>
+                        <option value="独立">独立</option>
+                        <option value="依赖">依赖</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>是否愿意线下</label>
+                    <select id="offlineWillingFilter">
+                        <option value="">全部</option>
+                        <option value="是">是</option>
+                        <option value="否">否</option>
+                    </select>
+                </div>
+                
+                <!-- 招募信息筛选 -->
+                <div class="filter-group">
+                    <label>招募人</label>
+                    <input type="text" id="recruiterFilter" placeholder="请输入招募人">
+                </div>
+                <div class="filter-group">
+                    <label>招募状态</label>
+                    <select id="recruitmentStatusFilter">
+                        <option value="">全部</option>
+                        <option value="跟进中">跟进中</option>
+                        <option value="已签约">已签约</option>
+                        <option value="等待签约">等待签约</option>
+                        <option value="签约失败">签约失败</option>
+                    </select>
+                </div>
+                
+                <!-- 数值范围筛选 -->
+                <div class="filter-group">
+                    <label>体重范围 (kg)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="weightMin" placeholder="最小值" min="0" step="0.1">
+                        <span>-</span>
+                        <input type="number" id="weightMax" placeholder="最大值" min="0" step="0.1">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>身高范围 (cm)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="heightMin" placeholder="最小值" min="0" step="0.1">
+                        <span>-</span>
+                        <input type="number" id="heightMax" placeholder="最大值" min="0" step="0.1">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>总流水范围 (元)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="revenueMin" placeholder="最小值" min="0" step="1000">
+                        <span>-</span>
+                        <input type="number" id="revenueMax" placeholder="最大值" min="0" step="1000">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="resetFilters()">重置筛选</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="openModal()">新增艺人</button>
+                <button class="btn btn-success" onclick="openBulkUploadModal()">批量上传</button>
+                <a href="/api/artists/template" class="btn btn-info" download="艺人信息模板.csv">下载模板</a>
+            </div>
+        </div>
+
+        <div class="artists-table">
+            <table>
+                <thead>
+                        <tr>
+                            <th>操作</th>
+                            <th>ID</th>
+                            <th>艺名</th>
+                            <th>抖音号</th>
+                            <th>唱功</th>
+                            <th>直播效果等级</th>
+                            <th>总流水(元)</th>
+                            <th>当前状态</th>
+                            <th>签约类型</th>
+                            <th>住址</th>
+                            <th>身高</th>
+                            <th>体重</th>
+                            <th>生日</th>
+                            <th>MBTI</th>
+                            <th>技能</th>
+                            <th>曲风</th>
+                            <th>参与项目</th>
+                            <th>参与活动</th>
+                        </tr>
+                    </thead>
+                <tbody id="artistsList">
+                </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🎭</div>
+                <h3>暂无艺人数据</h3>
+                <p>点击"新增艺人"按钮开始添加</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑艺人模态框 -->
+    <div id="artistModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">新增艺人</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="artistForm">
+                <input type="hidden" id="artistId">
+
+                <div class="scrollable-content">
+                    <!-- 基本信息 -->
+                    <div class="form-section">
+                        <h3>基本信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">艺名 *</label>
+                                <input type="text" id="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="realName">真名</label>
+                                <input type="text" id="realName">
+                            </div>
+                            <div class="form-group">
+                                <label for="douyinAccount">抖音号</label>
+                                <input type="text" id="douyinAccount">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">性别</label>
+                                <select id="gender">
+                                    <option value="">请选择</option>
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ethnicity">民族</label>
+                                <input type="text" id="ethnicity">
+                            </div>
+                            <div class="form-group">
+                                <label for="artMajor">艺术专业</label>
+                                <input type="text" id="artMajor">
+                            </div>
+                            <div class="form-group">
+                                <label for="height">身高(cm)</label>
+                                <input type="text" id="height" placeholder="如：175.50">
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">体重(kg)</label>
+                                <input type="text" id="weight" placeholder="如：65.80">
+                            </div>
+                            <div class="form-group">
+                                <label for="birthDate">生日</label>
+                                <input type="date" id="birthDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="joinDate">入会时间</label>
+                                <input type="date" id="joinDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 联系方式 -->
+                    <div class="form-section">
+                        <h3>联系方式</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="phone">手机号码</label>
+                                <input type="text" id="phone" placeholder="请输入手机号码">
+                            </div>
+                            <div class="form-group">
+                                <label for="wechat">微信号</label>
+                                <input type="text" id="wechat" placeholder="请输入微信号">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 招募信息 -->
+                    <div class="form-section">
+                        <h3>招募信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="recruiter">招募人</label>
+                                <input type="text" id="recruiter" readonly placeholder="自动获取当前用户">
+                            </div>
+                            <div class="form-group">
+                                <label for="recruitmentStatus">招募状态</label>
+                                <select id="recruitmentStatus">
+                                    <option value="">请选择</option>
+                                    <option value="跟进中">跟进中</option>
+                                    <option value="已签约">已签约</option>
+                                    <option value="等待签约">等待签约</option>
+                                    <option value="签约失败">签约失败</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 职业信息 -->
+                    <div class="form-section">
+                        <h3>职业信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="vocalSkill">唱功</label>
+                                <input type="text" id="vocalSkill" placeholder="如：S级/A级/B级">
+                            </div>
+                            <div class="form-group">
+                                <label for="liveEffectLevel">直播效果等级</label>
+                                <input type="text" id="liveEffectLevel" placeholder="如：一级/二级/三级">
+                            </div>
+                            <div class="form-group">
+                                <label for="totalRevenue">总流水(元)上月</label>
+                                <input type="text" id="totalRevenue" placeholder="如：10000.50">
+                            </div>
+                            <div class="form-group">
+                                <label for="currentStatus">当前状态</label>
+                                <input type="text" id="currentStatus" placeholder="如：在播/休息/实习">
+                            </div>
+                            <div class="form-group">
+                                <label for="contractType">签约类型</label>
+                                <input type="text" id="contractType" placeholder="如：独家/非独家">
+                            </div>
+                            <div class="form-group">
+                                <label for="occupation">职业</label>
+                                <input type="text" id="occupation" placeholder="如：歌手/主播">
+                            </div>
+                            <div class="form-group">
+                                <label for="musicStyle">曲风</label>
+                                <input type="text" id="musicStyle" placeholder="如：流行/摇滚/民谣">
+                            </div>
+                            <div class="form-group">
+                                <label for="fanName">粉丝名</label>
+                                <input type="text" id="fanName">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 个人信息 -->
+                    <div class="form-section">
+                        <h3>个人信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="relationshipStatus">感情情况</label>
+                                <input type="text" id="relationshipStatus" placeholder="如：单身/恋爱/已婚">
+                            </div>
+                            <div class="form-group">
+                                <label for="personality">性格</label>
+                                <input type="text" id="personality">
+                            </div>
+                            <div class="form-group">
+                                <label for="mbti">MBTI</label>
+                                <input type="text" id="mbti" maxlength="4" placeholder="如：INTJ/ENFP">
+                            </div>
+                            <div class="form-group">
+                <label for="addressProvince">住址 - 省</label>
+                <select id="addressProvince" onchange="updateCities('address')"></select>
+            </div>
+            <div class="form-group">
+                <label for="addressCity">住址 - 市</label>
+                <select id="addressCity"></select>
+            </div>
+            <div class="form-group">
+                <label for="householdProvince">户籍地 - 省</label>
+                <select id="householdProvince" onchange="updateCities('household')"></select>
+            </div>
+            <div class="form-group">
+                <label for="householdCity">户籍地 - 市</label>
+                <select id="householdCity"></select>
+            </div>
+                            <div class="form-group">
+                                <label for="willingOffline">是否愿意线下</label>
+                                <select id="willingOffline">
+                                    <option value="">请选择</option>
+                                    <option value="是">是</option>
+                                    <option value="否">否</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exposureParts">可露出部分</label>
+                                <input type="text" id="exposureParts">
+                            </div>
+                            <div class="form-group">
+                                <label for="singerAttachment">歌手影像</label>
+                                <input type="file" id="singerAttachment" accept="image/*,video/*" multiple>
+                                <div id="mediaPreview" style="margin-top: 15px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 其他信息 -->
+                    <div class="form-section">
+                        <h3>其他信息</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="skills">技能</label>
+                                <textarea id="skills" rows="2" placeholder="如：钢琴、吉他、舞蹈等"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="expectation">期望</label>
+                                <textarea id="expectation" rows="2"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="bond">羁绊</label>
+                                <textarea id="bond" rows="2"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="remarks">备注信息</label>
+                                <textarea id="remarks" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作日志 -->
+                    <div class="form-section">
+                        <h3>操作日志</h3>
+                        <div class="logs-container">
+                            <div id="operationLogs" class="operation-logs">
+                                <!-- 日志将通过JavaScript动态加载 -->
+                                <div class="loading">加载日志中...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">关闭</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 媒体预览模态框 -->
+    <div id="mediaPreviewModal" class="modal" style="display: none; z-index: 2000;">
+        <div class="modal-content" style="max-width: 90%; max-height: 90%; padding: 0; overflow: hidden; background: #000;">
+            <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+                <button class="btn btn-danger" onclick="closeMediaPreview()" style="background: rgba(255, 71, 87, 0.9); border: none; padding: 8px 16px; border-radius: 4px; color: white; cursor: pointer; font-size: 14px;">
+                    关闭
+                </button>
+            </div>
+            <div id="mediaPreviewContent" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 艺人详情模态框 -->
+    <div id="artistDetailModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>艺人详情</h2>
+                <button class="close-btn" onclick="closeArtistDetailModal()">&times;</button>
+            </div>
+            <div class="scrollable-content">
+                <!-- 基本信息 -->
+                <div class="form-section">
+                    <h3>基本信息</h3>
+                    <div class="info-grid" id="detailBasicInfo">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+
+                <!-- 联系方式 -->
+                <div class="form-section">
+                    <h3>联系方式</h3>
+                    <div class="info-grid" id="detailContactInfo">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+
+                <!-- 招募信息 -->
+                <div class="form-section">
+                    <h3>招募信息</h3>
+                    <div class="info-grid" id="detailRecruitmentInfo">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+
+                <!-- 跟进记录 -->
+                <div class="form-section">
+                    <h3>工单记录 <span style="font-size: 0.8rem; color: #999; font-weight: normal;">(最新5条)</span></h3>
+                    <div class="follow-up-timeline" id="followUpTimeline">
+                        <div class="no-logs">暂无跟进记录</div>
+                    </div>
+                    <div class="add-follow-up-form">
+                        <input type="text" id="followUpOperator" readonly placeholder="操作人">
+                        <input type="text" id="newFollowUpContent" placeholder="跟进记录内容..." style="flex: 1;">
+                        <button onclick="addFollowUp()">添加</button>
+                    </div>
+                </div>
+                
+                <!-- 行程管理 -->
+                <div class="form-section">
+                    <h3>行程管理 <span style="font-size: 0.8rem; color: #999; font-weight: normal;">(最新10条)</span></h3>
+                    <div class="schedule-section">
+                        <div class="schedule-tabs">
+                            <button class="tab-btn active" onclick="switchScheduleTab('list', this)">行程列表</button>
+                            <button class="tab-btn" onclick="switchScheduleTab('monthly', this)">月度视图</button>
+                        </div>
+                        
+                        <!-- 行程列表视图 -->
+                        <div id="scheduleListView" class="schedule-view active">
+                            <div class="schedule-list" id="scheduleList">
+                                <div class="no-schedule">暂无行程记录</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 月度视图 -->
+                        <div id="scheduleMonthlyView" class="schedule-view">
+                            <div class="monthly-calendar" id="monthlyCalendar">
+                                <!-- 动态生成日历 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 行程统计 -->
+                        <div class="schedule-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">总行程数</span>
+                                <span class="stat-value" id="totalScheduleCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">项目数量</span>
+                                <span class="stat-value" id="projectScheduleCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">活动数量</span>
+                                <span class="stat-value" id="activityScheduleCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作人确认模态框 -->
+    <div id="operatorModal" class="modal" style="display: none; z-index: 3000;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>操作确认</h2>
+                <button class="close-btn" onclick="closeOperatorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="operatorName">请输入操作人姓名</label>
+                    <input type="text" id="operatorName" placeholder="操作人姓名" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeOperatorModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmOperator()">确认</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 批量上传模态框 -->
+    <div id="bulkUploadModal" class="modal" style="display: none; z-index: 2000;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>批量上传艺人信息</h2>
+                <button class="close-btn" onclick="closeBulkUploadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="bulkFile">选择CSV文件</label>
+                    <input type="file" id="bulkFile" accept=".csv" required>
+                    <small>请使用提供的模板文件，确保格式正确</small>
+                </div>
+                <div class="form-group">
+                    <label for="bulkOperator">操作人姓名</label>
+                    <input type="text" id="bulkOperator" placeholder="请输入操作人姓名" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBulkUploadModal()">取消</button>
+                <button class="btn btn-primary" onclick="submitBulkUpload()">上传</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理艺人项目模态框 -->
+    <div id="manageProjectsModal" class="modal" style="display: none; z-index: 2000;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="manageProjectsTitle">管理艺人项目</h2>
+                <button class="close-btn" onclick="closeManageProjectsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="currentArtistId">
+                <div style="margin-bottom: 20px;">
+                    <h3>已参与项目</h3>
+                    <div id="artistProjectsList">
+                        <!-- 动态生成已参与项目列表 -->
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h3>添加新项目</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="projectSearch" placeholder="搜索项目标题..." style="flex: 1; padding: 10px; border: 2px solid #e1e8ed; border-radius: 8px;">
+                        <button class="btn btn-primary" onclick="searchProjects()">搜索</button>
+                    </div>
+                    <div id="projectSearchResults" style="max-height: 200px; overflow-y: auto; padding: 10px; background: #f8f9fa; border-radius: 8px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeManageProjectsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理艺人活动模态框 -->
+    <div id="manageActivitiesModal" class="modal" style="display: none; z-index: 2000;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="manageActivitiesTitle">管理艺人活动</h2>
+                <button class="close-btn" onclick="closeManageActivitiesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="currentArtistIdForActivities">
+                <div style="margin-bottom: 20px;">
+                    <h3>已参与活动</h3>
+                    <div id="artistActivitiesList">
+                        <!-- 动态生成已参与活动列表 -->
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h3>添加新活动</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="activitySearch" placeholder="搜索活动标题..." style="flex: 1; padding: 10px; border: 2px solid #e1e8ed; border-radius: 8px;">
+                        <button class="btn btn-primary" onclick="searchActivities()">搜索</button>
+                    </div>
+                    <div id="activitySearchResults" style="max-height: 200px; overflow-y: auto; padding: 10px; background: #f8f9fa; border-radius: 8px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeManageActivitiesModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let artists = [];
+        
+        // 操作人确认相关变量
+        let currentOperation = null;
+        let currentOperationData = null;
+        let currentOperator = '';
+        let currentArtistId = null;
+        
+        // 获取当前登录用户信息
+        function getCurrentUser() {
+            // 简化实现，不阻塞页面加载
+            fetch('/api/current-user')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return { nickname: '未知用户' };
+                })
+                .then(function(data) {
+                    currentOperator = data.nickname;
+                })
+                .catch(function(error) {
+                    console.error('获取当前用户信息失败:', error);
+                    currentOperator = '未知用户';
+                });
+        }
+
+        // 页面加载时获取艺人列表
+        async function loadArtists() {
+            try {
+                const response = await fetch('/api/artists');
+                const result = await response.json();
+                if (result.success) {
+                    artists = result.data;
+                    renderArtists(artists);
+                }
+            } catch (error) {
+                console.error('加载艺人列表失败:', error);
+                alert('加载艺人列表失败，请刷新页面重试');
+            }
+        }
+
+        // 渲染艺人列表
+        // 加载艺人详情（用于获取关联的项目和活动）
+        async function loadArtistWithDetails(artistId) {
+            try {
+                const response = await fetch(`/api/artists/${artistId}`);
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                return null;
+            } catch (error) {
+                console.error('加载艺人详情失败:', error);
+                return null;
+            }
+        }
+
+        // 渲染参与项目列
+        async function renderArtistProjects(artistId) {
+            console.log(`开始渲染艺人 ${artistId} 的项目`);
+            const artist = await loadArtistWithDetails(artistId);
+            console.log(`获取到的艺人数据:`, artist);
+            
+            if (!artist) {
+                console.log(`艺人数据不存在`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            if (!artist.projects) {
+                console.log(`艺人项目数组不存在`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            if (artist.projects.length === 0) {
+                console.log(`艺人项目数组为空`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            console.log(`艺人参与的项目数量:`, artist.projects.length);
+            return artist.projects.map(project => 
+                `<span class="tag" style="margin-right: 5px; cursor: pointer; text-decoration: underline; color: #667eea;" onclick="window.location.href='/projects'; setTimeout(() => editProject(${project.id}), 500);">${project.title}</span>`
+            ).join('');
+        }
+
+        // 渲染参与活动列
+        async function renderArtistActivities(artistId) {
+            console.log(`开始渲染艺人 ${artistId} 的活动`);
+            const artist = await loadArtistWithDetails(artistId);
+            console.log(`获取到的艺人数据:`, artist);
+            
+            if (!artist) {
+                console.log(`艺人数据不存在`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            if (!artist.activities) {
+                console.log(`艺人活动数组不存在`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            if (artist.activities.length === 0) {
+                console.log(`艺人活动数组为空`);
+                return '<span class="tag">0 个</span>';
+            }
+            
+            console.log(`艺人参与的活动数量:`, artist.activities.length);
+            return artist.activities.map(activity => 
+                `<span class="tag" style="margin-right: 5px; cursor: pointer; text-decoration: underline; color: #fa709a;" onclick="window.location.href='/activities'; setTimeout(() => editActivity(${activity.id}), 500);">${activity.title}</span>`
+            ).join('');
+        }
+
+        function renderArtists(artistList) {
+            const tbody = document.getElementById('artistsList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (artistList.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = artistList.map(artist => `
+                <tr data-id="${artist.id}">
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-view" onclick="viewArtistDetail(${artist.id})">新增工单</button>
+                            <button class="btn btn-edit" onclick="editArtist(${artist.id})">编辑</button>
+                            <button class="btn btn-delete" onclick="deleteArtist(${artist.id})">删除</button>
+                        </div>
+                    </td>
+                    <td>${artist.id}</td>
+                    <td><a href="#" onclick="editArtist(${artist.id}); return false;" class="artist-name" style="text-decoration: underline; color: #667eea;"><strong>${artist.name}</strong></a></td>
+                    <td>${artist.douyin_account || '-'}</td>
+                    <td>${artist.vocal_skill || '-'}</td>
+                    <td>${artist.live_effect_level || '-'}</td>
+                    <td>${artist.total_revenue ? Number(artist.total_revenue).toLocaleString() : '-'}</td>
+                    <td><span class="tag">${artist.current_status || '-'}</span></td>
+                    <td>${artist.contract_type || '-'}</td>
+                    <td>${artist.address || '-'}</td>
+                    <td>${artist.height || '-'}</td>
+                    <td>${artist.weight || '-'}</td>
+                    <td>${formatDate(artist.birth_date)}</td>
+                    <td>${artist.mbti || '-'}</td>
+                    <td>${artist.skills || '-'}</td>
+                    <td>${artist.music_style || '-'}</td>
+                    <td id="projects-${artist.id}"><span class="tag">${artist.project_count || 0} 个</span></td>
+                    <td id="activities-${artist.id}"><span class="tag">${artist.activity_count || 0} 个</span></td>
+                </tr>
+            `).join('');
+
+            // 异步加载并渲染具体的项目和活动
+            artistList.forEach(artist => {
+                // 渲染参与项目
+                renderArtistProjects(artist.id).then(html => {
+                    const projectsCell = document.getElementById(`projects-${artist.id}`);
+                    if (projectsCell) {
+                        projectsCell.innerHTML = html;
+                    }
+                });
+                // 渲染参与活动
+                renderArtistActivities(artist.id).then(html => {
+                    const activitiesCell = document.getElementById(`activities-${artist.id}`);
+                    if (activitiesCell) {
+                        activitiesCell.innerHTML = html;
+                    }
+                });
+            });
+        }
+
+        // 省市数据
+        const provincesCities = {
+            '北京市': ['东城区', '西城区', '朝阳区', '丰台区', '石景山区', '海淀区', '门头沟区', '房山区', '通州区', '顺义区', '昌平区', '大兴区', '怀柔区', '平谷区', '密云区', '延庆区'],
+            '上海市': ['黄浦区', '徐汇区', '长宁区', '静安区', '普陀区', '虹口区', '杨浦区', '闵行区', '宝山区', '嘉定区', '浦东新区', '金山区', '松江区', '青浦区', '奉贤区', '崇明区'],
+            '天津市': ['和平区', '河东区', '河西区', '南开区', '河北区', '红桥区', '东丽区', '西青区', '津南区', '北辰区', '武清区', '宝坻区', '滨海新区', '宁河区', '静海区', '蓟州区'],
+            '重庆市': ['万州区', '黔江区', '涪陵区', '渝中区', '大渡口区', '江北区', '沙坪坝区', '九龙坡区', '南岸区', '北碚区', '渝北区', '巴南区', '长寿区', '江津区', '合川区', '永川区', '南川区', '綦江区', '大足区', '璧山区', '铜梁区', '潼南区', '荣昌区', '开州区', '梁平区', '武隆区', '城口县', '丰都县', '垫江县', '忠县', '云阳县', '奉节县', '巫山县', '巫溪县', '石柱土家族自治县', '秀山土家族苗族自治县', '酉阳土家族苗族自治县', '彭水苗族土家族自治县'],
+            '河北省': ['石家庄市', '唐山市', '秦皇岛市', '邯郸市', '邢台市', '保定市', '张家口市', '承德市', '沧州市', '廊坊市', '衡水市'],
+            '山西省': ['太原市', '大同市', '阳泉市', '长治市', '晋城市', '朔州市', '晋中市', '运城市', '忻州市', '临汾市', '吕梁市'],
+            '辽宁省': ['沈阳市', '大连市', '鞍山市', '抚顺市', '本溪市', '丹东市', '锦州市', '营口市', '阜新市', '辽阳市', '盘锦市', '铁岭市', '朝阳市', '葫芦岛市'],
+            '吉林省': ['长春市', '吉林市', '四平市', '辽源市', '通化市', '白山市', '松原市', '白城市', '延边朝鲜族自治州'],
+            '黑龙江省': ['哈尔滨市', '齐齐哈尔市', '鸡西市', '鹤岗市', '双鸭山市', '大庆市', '伊春市', '佳木斯市', '七台河市', '牡丹江市', '黑河市', '绥化市', '大兴安岭地区'],
+            '江苏省': ['南京市', '无锡市', '徐州市', '常州市', '苏州市', '南通市', '连云港市', '淮安市', '盐城市', '扬州市', '镇江市', '泰州市', '宿迁市'],
+            '浙江省': ['杭州市', '宁波市', '温州市', '嘉兴市', '湖州市', '绍兴市', '金华市', '衢州市', '舟山市', '台州市', '丽水市'],
+            '安徽省': ['合肥市', '芜湖市', '蚌埠市', '淮南市', '马鞍山市', '淮北市', '铜陵市', '安庆市', '黄山市', '滁州市', '阜阳市', '宿州市', '六安市', '亳州市', '池州市', '宣城市'],
+            '福建省': ['福州市', '厦门市', '莆田市', '三明市', '泉州市', '漳州市', '南平市', '龙岩市', '宁德市'],
+            '江西省': ['南昌市', '景德镇市', '萍乡市', '九江市', '新余市', '鹰潭市', '赣州市', '吉安市', '宜春市', '抚州市', '上饶市'],
+            '山东省': ['济南市', '青岛市', '淄博市', '枣庄市', '东营市', '烟台市', '潍坊市', '济宁市', '泰安市', '威海市', '日照市', '临沂市', '德州市', '聊城市', '滨州市', '菏泽市'],
+            '河南省': ['郑州市', '开封市', '洛阳市', '平顶山市', '安阳市', '鹤壁市', '新乡市', '焦作市', '濮阳市', '许昌市', '漯河市', '三门峡市', '南阳市', '商丘市', '信阳市', '周口市', '驻马店市'],
+            '湖北省': ['武汉市', '黄石市', '十堰市', '宜昌市', '襄阳市', '鄂州市', '荆门市', '孝感市', '荆州市', '黄冈市', '咸宁市', '随州市', '恩施土家族苗族自治州'],
+            '湖南省': ['长沙市', '株洲市', '湘潭市', '衡阳市', '邵阳市', '岳阳市', '常德市', '张家界市', '益阳市', '郴州市', '永州市', '怀化市', '娄底市', '湘西土家族苗族自治州'],
+            '广东省': ['广州市', '韶关市', '深圳市', '珠海市', '汕头市', '佛山市', '江门市', '湛江市', '茂名市', '肇庆市', '惠州市', '梅州市', '汕尾市', '河源市', '阳江市', '清远市', '东莞市', '中山市', '潮州市', '揭阳市', '云浮市'],
+            '广西壮族自治区': ['南宁市', '柳州市', '桂林市', '梧州市', '北海市', '防城港市', '钦州市', '贵港市', '玉林市', '百色市', '贺州市', '河池市', '来宾市', '崇左市'],
+            '海南省': ['海口市', '三亚市', '三沙市', '儋州市'],
+            '四川省': ['成都市', '自贡市', '攀枝花市', '泸州市', '德阳市', '绵阳市', '广元市', '遂宁市', '内江市', '乐山市', '南充市', '眉山市', '宜宾市', '广安市', '达州市', '雅安市', '巴中市', '资阳市', '阿坝藏族羌族自治州', '甘孜藏族自治州', '凉山彝族自治州'],
+            '贵州省': ['贵阳市', '六盘水市', '遵义市', '安顺市', '毕节市', '铜仁市', '黔西南布依族苗族自治州', '黔东南苗族侗族自治州', '黔南布依族苗族自治州'],
+            '云南省': ['昆明市', '曲靖市', '玉溪市', '保山市', '昭通市', '丽江市', '普洱市', '临沧市', '楚雄彝族自治州', '红河哈尼族彝族自治州', '文山壮族苗族自治州', '西双版纳傣族自治州', '大理白族自治州', '德宏傣族景颇族自治州', '怒江傈僳族自治州', '迪庆藏族自治州'],
+            '西藏自治区': ['拉萨市', '日喀则市', '昌都市', '林芝市', '山南市', '那曲市', '阿里地区'],
+            '陕西省': ['西安市', '铜川市', '宝鸡市', '咸阳市', '渭南市', '延安市', '汉中市', '榆林市', '安康市', '商洛市'],
+            '甘肃省': ['兰州市', '嘉峪关市', '金昌市', '白银市', '天水市', '武威市', '张掖市', '平凉市', '酒泉市', '庆阳市', '定西市', '陇南市', '临夏回族自治州', '甘南藏族自治州'],
+            '青海省': ['西宁市', '海东市', '海北藏族自治州', '黄南藏族自治州', '海南藏族自治州', '果洛藏族自治州', '玉树藏族自治州', '海西蒙古族藏族自治州'],
+            '宁夏回族自治区': ['银川市', '石嘴山市', '吴忠市', '固原市', '中卫市'],
+            '新疆维吾尔自治区': ['乌鲁木齐市', '克拉玛依市', '吐鲁番市', '哈密市', '昌吉回族自治州', '博尔塔拉蒙古自治州', '巴音郭楞蒙古自治州', '阿克苏地区', '克孜勒苏柯尔克孜自治州', '喀什地区', '和田地区', '伊犁哈萨克自治州', '塔城地区', '阿勒泰地区'],
+            '内蒙古自治区': ['呼和浩特市', '包头市', '乌海市', '赤峰市', '通辽市', '鄂尔多斯市', '呼伦贝尔市', '巴彦淖尔市', '乌兰察布市', '兴安盟', '锡林郭勒盟', '阿拉善盟'],
+            '台湾省': ['台北市', '新北市', '桃园市', '台中市', '台南市', '高雄市', '基隆市', '新竹市', '嘉义市'],
+            '香港特别行政区': ['香港岛', '九龙半岛', '新界'],
+            '澳门特别行政区': ['澳门半岛', '氹仔岛', '路环岛']
+        };
+
+        // 下拉菜单选项数据
+        const dropdownOptions = {
+            ethnicity: ['汉族', '蒙古族', '回族', '藏族', '维吾尔族', '苗族', '彝族', '壮族', '布依族', '朝鲜族', '满族', '侗族', '瑶族', '白族', '土家族', '哈尼族', '哈萨克族', '傣族', '黎族', '傈僳族', '佤族', '畲族', '高山族', '拉祜族', '水族', '东乡族', '纳西族', '景颇族', '柯尔克孜族', '土族', '达斡尔族', '仫佬族', '羌族', '布朗族', '撒拉族', '毛南族', '仡佬族', '锡伯族', '阿昌族', '普米族', '塔吉克族', '怒族', '乌孜别克族', '俄罗斯族', '鄂温克族', '德昂族', '保安族', '裕固族', '京族', '塔塔尔族', '独龙族', '鄂伦春族', '赫哲族', '门巴族', '珞巴族', '基诺族'],
+            vocal_skill: ['专业', '优秀', '良好', '一般', '入门'],
+            live_effect_level: ['S级', 'A级', 'B级', 'C级', 'D级'],
+            current_status: ['活跃', '休息', '暂停', '解约'],
+            contract_type: ['独家签约', '非独家', '兼职'],
+            music_style: ['流行', '摇滚', '民谣', '电子', '嘻哈', '古典', '爵士', 'R&B', '乡村', '古风', '金属', '蓝调', '雷鬼', '朋克', '拉丁'],
+            relationship_status: ['单身', '恋爱中', '已婚', '离异', '丧偶'],
+            personality: ['开朗', '内向', '活泼', '沉稳', '热情', '冷静', '幽默', '严肃', '温柔', '强势', '细腻', '豪爽', '敏感', '大大咧咧', '安静', '外向', '独立', '依赖'],
+            mbti: ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ']
+        };
+
+        // 初始化单个下拉菜单
+        function initSingleDropdown(fieldId, fieldName) {
+            const input = document.getElementById(fieldId);
+            if (input && input.tagName === 'INPUT') {
+                // 创建下拉菜单
+                const select = document.createElement('select');
+                select.id = input.id;
+                select.className = input.className;
+                
+                // 添加空选项
+                const emptyOption = document.createElement('option');
+                emptyOption.value = '';
+                emptyOption.textContent = '请选择';
+                select.appendChild(emptyOption);
+                
+                // 添加选项
+                dropdownOptions[fieldName].forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option;
+                    opt.textContent = option;
+                    select.appendChild(opt);
+                });
+                
+                // 保留原始值
+                select.value = input.value;
+                
+                // 替换输入框为下拉菜单
+                input.parentNode.replaceChild(select, input);
+            }
+        }
+
+        // 格式化日期为 YYYY年MM月DD日 格式
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            
+            // 创建日期对象
+            const date = new Date(dateString);
+            
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) return '-';
+            
+            // 提取年月日
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            // 返回格式化后的日期
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 格式化日期时间为 yyyy年mm月dd日 HH点mm分 格式
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '-';
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}年${month}月${day}日 ${hours}点${minutes}分`;
+        }
+
+        // 初始化省份下拉框
+        function initProvinceDropdowns() {
+            const provinces = Object.keys(provincesCities);
+            
+            // 初始化住址省份下拉框
+            const addressProvinceSelect = document.getElementById('addressProvince');
+            addressProvinceSelect.innerHTML = '<option value="">请选择省份</option>';
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                addressProvinceSelect.appendChild(option);
+            });
+            
+            // 初始化户籍地省份下拉框
+            const householdProvinceSelect = document.getElementById('householdProvince');
+            householdProvinceSelect.innerHTML = '<option value="">请选择省份</option>';
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                householdProvinceSelect.appendChild(option);
+            });
+        }
+
+        // 更新城市下拉框
+        function updateCities(type) {
+            const provinceSelect = document.getElementById(`${type}Province`);
+            const citySelect = document.getElementById(`${type}City`);
+            const selectedProvince = provinceSelect.value;
+            
+            citySelect.innerHTML = '<option value="">请选择城市</option>';
+            
+            if (selectedProvince && provincesCities[selectedProvince]) {
+                const cities = provincesCities[selectedProvince];
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 解析地址为省份和城市
+        function parseAddress(address) {
+            if (!address) return { province: '', city: '' };
+            
+            // 遍历所有省份，查找匹配的省份
+            for (const province in provincesCities) {
+                if (address.startsWith(province)) {
+                    // 省份匹配成功
+                    const remaining = address.substring(province.length);
+                    // 查找匹配的城市
+                    for (const city of provincesCities[province]) {
+                        if (remaining.startsWith(city)) {
+                            return { province, city };
+                        }
+                    }
+                    // 如果没有匹配的城市，只返回省份
+                    return { province, city: '' };
+                }
+            }
+            
+            return { province: '', city: '' };
+        }
+        
+        // 设置地址选择器的值
+        function setAddressValue(type, fullAddress) {
+            const { province, city } = parseAddress(fullAddress);
+            const provinceSelect = document.getElementById(`${type}Province`);
+            const citySelect = document.getElementById(`${type}City`);
+            
+            // 设置省份
+            provinceSelect.value = province;
+            
+            // 更新城市下拉框
+            updateCities(type);
+            
+            // 设置城市
+            citySelect.value = city;
+        }
+
+        // 初始化所有下拉菜单
+        function initDropdowns() {
+            // 字段映射：前端ID -> 后端字段名
+            const fieldMap = {
+                'ethnicity': 'ethnicity',
+                'vocalSkill': 'vocal_skill',
+                'liveEffectLevel': 'live_effect_level',
+                'currentStatus': 'current_status',
+                'contractType': 'contract_type',
+                'musicStyle': 'music_style',
+                'relationshipStatus': 'relationship_status',
+                'personality': 'personality',
+                'mbti': 'mbti'
+            };
+            
+            // 初始化所有下拉菜单
+            Object.entries(fieldMap).forEach(([fieldId, fieldName]) => {
+                initSingleDropdown(fieldId, fieldName);
+            });
+            
+            // 初始化省份下拉框
+            initProvinceDropdowns();
+        }
+
+        // 页面加载时初始化下拉菜单
+        document.addEventListener('DOMContentLoaded', initDropdowns);
+        
+        // 当模态框打开时，确保下拉菜单已初始化
+        function ensureDropdownsInitialized() {
+            // 短暂延迟确保DOM已更新
+            setTimeout(() => {
+                initDropdowns();
+            }, 100);
+        }
+
+        // 筛选功能
+        function filterArtists() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const contractType = document.getElementById('contractTypeFilter').value;
+            const gender = document.getElementById('genderFilter').value;
+            const ethnicity = document.getElementById('ethnicityFilter').value;
+            const vocalSkill = document.getElementById('vocalSkillFilter').value;
+            const liveEffect = document.getElementById('liveEffectFilter').value;
+            const weightMin = parseFloat(document.getElementById('weightMin').value) || 0;
+            const weightMax = parseFloat(document.getElementById('weightMax').value) || Infinity;
+            const heightMin = parseFloat(document.getElementById('heightMin').value) || 0;
+            const heightMax = parseFloat(document.getElementById('heightMax').value) || Infinity;
+            const revenueMin = parseFloat(document.getElementById('revenueMin').value) || 0;
+            const revenueMax = parseFloat(document.getElementById('revenueMax').value) || Infinity;
+            
+            // 职业信息筛选
+            const occupation = document.getElementById('occupationFilter').value;
+            const musicStyle = document.getElementById('musicStyleFilter').value;
+            
+            // 个人信息筛选
+            const mbti = document.getElementById('mbtiFilter').value;
+            const relationship = document.getElementById('relationshipFilter').value;
+            const personality = document.getElementById('personalityFilter').value;
+            const offlineWilling = document.getElementById('offlineWillingFilter').value;
+            
+            // 招募信息筛选
+            const recruiter = document.getElementById('recruiterFilter').value.toLowerCase();
+            const recruitmentStatus = document.getElementById('recruitmentStatusFilter').value;
+
+            const filteredArtists = artists.filter(artist => {
+                // 搜索词筛选
+                const matchesSearch = !searchTerm ||
+                    (artist.name && artist.name.toLowerCase().includes(searchTerm)) ||
+                    (artist.douyin_account && artist.douyin_account.toLowerCase().includes(searchTerm));
+                
+                // 状态筛选
+                const matchesStatus = !status || artist.current_status === status;
+                
+                // 签约类型筛选
+                const matchesContractType = !contractType || artist.contract_type === contractType;
+                
+                // 性别筛选
+                const matchesGender = !gender || artist.gender === gender;
+                
+                // 民族筛选
+                const matchesEthnicity = !ethnicity || artist.ethnicity === ethnicity;
+                
+                // 唱功筛选
+                const matchesVocalSkill = !vocalSkill || artist.vocal_skill === vocalSkill;
+                
+                // 直播效果等级筛选
+                const matchesLiveEffect = !liveEffect || artist.live_effect_level === liveEffect;
+                
+                // 体重范围筛选
+                const artistWeight = parseFloat(artist.weight) || 0;
+                const matchesWeight = artistWeight >= weightMin && artistWeight <= weightMax;
+                
+                // 身高范围筛选
+                const artistHeight = parseFloat(artist.height) || 0;
+                const matchesHeight = artistHeight >= heightMin && artistHeight <= heightMax;
+                
+                // 总流水范围筛选
+                const artistRevenue = parseFloat(artist.total_revenue) || 0;
+                const matchesRevenue = artistRevenue >= revenueMin && artistRevenue <= revenueMax;
+                
+                // 职业筛选
+                const matchesOccupation = !occupation || artist.occupation === occupation;
+                
+                // 曲风筛选
+                const matchesMusicStyle = !musicStyle || artist.music_style === musicStyle;
+                
+                // 个人信息筛选
+                const matchesMBTI = !mbti || artist.mbti === mbti;
+                const matchesRelationship = !relationship || artist.relationship_status === relationship;
+                const matchesPersonality = !personality || artist.personality === personality;
+                const matchesOfflineWilling = !offlineWilling || artist.willing_offline === offlineWilling;
+                
+                // 招募信息筛选
+                const matchesRecruiter = !recruiter || (artist.recruiter && artist.recruiter.toLowerCase().includes(recruiter));
+                const matchesRecruitmentStatus = !recruitmentStatus || artist.recruitment_status === recruitmentStatus;
+                
+                return matchesSearch && matchesStatus && matchesContractType && matchesGender && 
+                       matchesEthnicity && matchesVocalSkill && matchesLiveEffect && 
+                       matchesWeight && matchesHeight && matchesRevenue &&
+                       matchesOccupation && matchesMusicStyle &&
+                       matchesMBTI && matchesRelationship && matchesPersonality && matchesOfflineWilling &&
+                       matchesRecruiter && matchesRecruitmentStatus;
+            });
+            
+            renderArtists(filteredArtists);
+        }
+
+        // 为所有筛选输入添加事件监听器
+        document.getElementById('searchInput').addEventListener('input', filterArtists);
+        document.getElementById('statusFilter').addEventListener('change', filterArtists);
+        document.getElementById('contractTypeFilter').addEventListener('change', filterArtists);
+        document.getElementById('genderFilter').addEventListener('change', filterArtists);
+        document.getElementById('ethnicityFilter').addEventListener('change', filterArtists);
+        document.getElementById('vocalSkillFilter').addEventListener('change', filterArtists);
+        document.getElementById('liveEffectFilter').addEventListener('change', filterArtists);
+        document.getElementById('weightMin').addEventListener('input', filterArtists);
+        document.getElementById('weightMax').addEventListener('input', filterArtists);
+        document.getElementById('heightMin').addEventListener('input', filterArtists);
+        document.getElementById('heightMax').addEventListener('input', filterArtists);
+        document.getElementById('revenueMin').addEventListener('input', filterArtists);
+        document.getElementById('revenueMax').addEventListener('input', filterArtists);
+        
+        // 职业信息筛选事件监听器
+        document.getElementById('occupationFilter').addEventListener('change', filterArtists);
+        document.getElementById('musicStyleFilter').addEventListener('change', filterArtists);
+        
+        // 个人信息筛选事件监听器
+        document.getElementById('mbtiFilter').addEventListener('change', filterArtists);
+        document.getElementById('relationshipFilter').addEventListener('change', filterArtists);
+        document.getElementById('personalityFilter').addEventListener('change', filterArtists);
+        document.getElementById('offlineWillingFilter').addEventListener('change', filterArtists);
+
+        // 重置筛选
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('contractTypeFilter').value = '';
+            document.getElementById('genderFilter').value = '';
+            document.getElementById('ethnicityFilter').value = '';
+            document.getElementById('vocalSkillFilter').value = '';
+            document.getElementById('liveEffectFilter').value = '';
+            document.getElementById('weightMin').value = '';
+            document.getElementById('weightMax').value = '';
+            document.getElementById('heightMin').value = '';
+            document.getElementById('heightMax').value = '';
+            document.getElementById('revenueMin').value = '';
+            document.getElementById('revenueMax').value = '';
+            
+            // 重置职业信息筛选
+            document.getElementById('occupationFilter').value = '';
+            document.getElementById('musicStyleFilter').value = '';
+            
+            // 重置个人信息筛选
+            document.getElementById('mbtiFilter').value = '';
+            document.getElementById('relationshipFilter').value = '';
+            document.getElementById('personalityFilter').value = '';
+            document.getElementById('offlineWillingFilter').value = '';
+            
+            // 重置招募信息筛选
+            document.getElementById('recruiterFilter').value = '';
+            document.getElementById('recruitmentStatusFilter').value = '';
+            
+            filterArtists();
+        }
+
+        // 加载操作日志
+        async function loadOperationLogs(artistId) {
+            const logsContainer = document.getElementById('operationLogs');
+            if (!artistId) {
+                logsContainer.innerHTML = '<div class="no-logs">无操作日志</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/artists/${artistId}/logs`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const logs = result.data;
+                    
+                    if (logs.length === 0) {
+                        logsContainer.innerHTML = '<div class="no-logs">无操作日志</div>';
+                        return;
+                    }
+                    
+                    logsContainer.innerHTML = logs.map(log => `
+                        <div class="log-item">
+                            <div class="log-header">
+                                <span class="log-operator">${log.operator}</span>
+                                <span class="log-time">${log.operation_time}</span>
+                            </div>
+                            <span class="log-type ${log.operation_type}">${log.operation_type}</span>
+                            <div class="log-content">${log.operation_content}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    logsContainer.innerHTML = '<div class="no-logs">加载日志失败</div>';
+                }
+            } catch (error) {
+                console.error('加载操作日志失败:', error);
+                logsContainer.innerHTML = '<div class="no-logs">加载日志失败</div>';
+            }
+        }
+
+        // 打开模态框
+        function openModal(artist = null) {
+            const modal = document.getElementById('artistModal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('artistForm');
+            const mediaPreview = document.getElementById('mediaPreview');
+
+            // 清空媒体预览
+            mediaPreview.innerHTML = '';
+            
+            // 重置文件输入框
+            document.getElementById('singerAttachment').value = '';
+
+            if (artist) {
+                title.textContent = '编辑艺人';
+                document.getElementById('artistId').value = artist.id;
+                document.getElementById('name').value = artist.name || '';
+                document.getElementById('realName').value = artist.real_name || '';
+                document.getElementById('douyinAccount').value = artist.douyin_account || '';
+                document.getElementById('phone').value = artist.phone || '';
+                document.getElementById('wechat').value = artist.wechat || '';
+                document.getElementById('recruiter').value = artist.recruiter || '';
+                document.getElementById('recruitmentStatus').value = artist.recruitment_status || '';
+                document.getElementById('gender').value = artist.gender || '';
+                document.getElementById('ethnicity').value = artist.ethnicity || '';
+                document.getElementById('artMajor').value = artist.art_major || '';
+                document.getElementById('vocalSkill').value = artist.vocal_skill || '';
+                document.getElementById('liveEffectLevel').value = artist.live_effect_level || '';
+                document.getElementById('totalRevenue').value = artist.total_revenue || '';
+                document.getElementById('currentStatus').value = artist.current_status || '';
+                setAddressValue('address', artist.address || '');
+                setAddressValue('household', artist.household_address || '');
+                document.getElementById('willingOffline').value = artist.willing_offline || '';
+                document.getElementById('exposureParts').value = artist.exposure_parts || '';
+                document.getElementById('contractType').value = artist.contract_type || '';
+                document.getElementById('remarks').value = artist.remarks || '';
+                document.getElementById('joinDate').value = artist.join_date || '';
+                document.getElementById('height').value = artist.height || '';
+                document.getElementById('weight').value = artist.weight || '';
+                document.getElementById('birthDate').value = artist.birth_date || '';
+                document.getElementById('relationshipStatus').value = artist.relationship_status || '';
+                document.getElementById('personality').value = artist.personality || '';
+                document.getElementById('mbti').value = artist.mbti || '';
+                document.getElementById('occupation').value = artist.occupation || '';
+                document.getElementById('skills').value = artist.skills || '';
+                document.getElementById('fanName').value = artist.fan_name || '';
+                document.getElementById('musicStyle').value = artist.music_style || '';
+                document.getElementById('expectation').value = artist.expectation || '';
+                document.getElementById('bond').value = artist.bond || '';
+                
+                // 显示已上传的媒体文件
+                if (artist.singer_attachment) {
+                    const files = artist.singer_attachment.split(',');
+                    files.forEach(filename => {
+                        const fileUrl = `/uploads/${filename}`;
+                        const mediaElement = document.createElement(filename.endsWith('.mp4') || filename.endsWith('.mov') || filename.endsWith('.avi') ? 'video' : 'img');
+                        
+                        if (mediaElement.tagName === 'VIDEO') {
+                            mediaElement.controls = true;
+                            mediaElement.style.maxWidth = '100%';
+                            mediaElement.style.maxHeight = '200px';
+                            mediaElement.style.marginRight = '10px';
+                            mediaElement.style.marginBottom = '10px';
+                            mediaElement.src = fileUrl;
+                        } else {
+                            mediaElement.style.maxWidth = '200px';
+                            mediaElement.style.maxHeight = '200px';
+                            mediaElement.style.marginRight = '10px';
+                            mediaElement.style.marginBottom = '10px';
+                            mediaElement.style.cursor = 'pointer';
+                            mediaElement.src = fileUrl;
+                            mediaElement.onclick = () => {
+                                openMediaPreview(fileUrl, mediaElement.tagName === 'VIDEO');
+                            };
+                        }
+                        
+                        mediaPreview.appendChild(mediaElement);
+                    });
+                }
+            } else {
+                title.textContent = '新增艺人';
+                form.reset();
+                document.getElementById('artistId').value = '';
+                // 自动填充招募人为当前用户
+                document.getElementById('recruiter').value = currentOperator || '未知用户';
+            }
+
+            modal.classList.add('active');
+            
+            // 确保下拉菜单已初始化
+            ensureDropdownsInitialized();
+            
+            // 加载操作日志
+            loadOperationLogs(artist ? artist.id : null);
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('artistModal').classList.remove('active');
+        }
+
+        // 执行操作（自动使用当前登录用户作为操作人）
+        async function executeOperation(operation, data) {
+            if (!currentOperator) {
+                alert('获取当前用户信息失败，请刷新页面重试');
+                return;
+            }
+
+            try {
+                let result;
+                
+                // 根据当前操作类型执行相应操作
+                switch (operation) {
+                    case 'create':
+                        result = await createArtistWithOperator(currentOperator, data);
+                        break;
+                    case 'update':
+                        result = await updateArtistWithOperator(currentOperator, data);
+                        break;
+                    case 'delete':
+                        result = await deleteArtistWithOperator(currentOperator, data.id);
+                        break;
+                }
+
+                if (result.success) {
+                    await loadArtists();
+                    closeModal();
+                    alert(operation === 'create' ? '创建成功' : operation === 'update' ? '更新成功' : '删除成功');
+                } else {
+                    alert(result.error || '操作失败');
+                }
+            } catch (error) {
+                console.error('操作失败:', error);
+                alert('操作失败，请重试');
+            }
+        }
+
+        // 打开操作人确认模态框（仅用于兼容旧代码，实际不再需要手动输入）
+        function openOperatorModal(operation, data) {
+            // 直接执行操作，不显示模态框
+            executeOperation(operation, data);
+        }
+
+        // 关闭操作人确认模态框（仅用于兼容旧代码）
+        function closeOperatorModal() {
+            // 不需要实际关闭，因为不再显示模态框
+        }
+
+        // 确认操作人（仅用于兼容旧代码）
+        async function confirmOperator() {
+            // 此函数不再使用
+        }
+
+        // 带操作人的创建艺人函数
+        async function createArtistWithOperator(operator, data) {
+            data.operator = operator;
+            const response = await fetch('/api/artists', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        // 带操作人的更新艺人函数
+        async function updateArtistWithOperator(operator, data) {
+            data.operator = operator;
+            const response = await fetch(`/api/artists/${data.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        // 带操作人的删除艺人函数
+        async function deleteArtistWithOperator(operator, artistId) {
+            const response = await fetch(`/api/artists/${artistId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ operator })
+            });
+            return await response.json();
+        }
+        
+        // 打开媒体预览模态框
+        function openMediaPreview(fileUrl, isVideo) {
+            const modal = document.getElementById('mediaPreviewModal');
+            const content = document.getElementById('mediaPreviewContent');
+            
+            // 清空内容
+            content.innerHTML = '';
+            
+            // 创建媒体元素
+            const mediaElement = document.createElement(isVideo ? 'video' : 'img');
+            
+            if (isVideo) {
+                mediaElement.controls = true;
+                mediaElement.style.maxWidth = '90vw';
+                mediaElement.style.maxHeight = '90vh';
+                mediaElement.style.objectFit = 'contain';
+                mediaElement.src = fileUrl;
+            } else {
+                mediaElement.style.maxWidth = '90vw';
+                mediaElement.style.maxHeight = '90vh';
+                mediaElement.style.objectFit = 'contain';
+                mediaElement.src = fileUrl;
+            }
+            
+            content.appendChild(mediaElement);
+            
+            // 显示模态框
+            modal.style.display = 'flex';
+        }
+        
+        // 关闭媒体预览模态框
+        function closeMediaPreview() {
+            const modal = document.getElementById('mediaPreviewModal');
+            modal.style.display = 'none';
+        }
+        
+        // 点击媒体预览模态框空白处关闭
+        document.getElementById('mediaPreviewModal').addEventListener('click', function(e) {
+            const modal = document.getElementById('mediaPreviewModal');
+            const content = document.getElementById('mediaPreviewContent');
+            
+            // 如果点击的是模态框背景，而不是内容区域，关闭模态框
+            if (e.target === modal || e.target === content) {
+                closeMediaPreview();
+            }
+        });
+
+        // 编辑艺人
+        async function editArtist(id) {
+            console.log('editArtist called with id:', id);
+
+            try {
+                const response = await fetch(`/api/artists/${id}`);
+                const result = await response.json();
+                if (result.success) {
+                    openModal(result.data);
+                } else {
+                    alert('获取艺人信息失败');
+                }
+            } catch (error) {
+                console.error('获取艺人信息失败:', error);
+                alert('获取艺人信息失败，请重试');
+            }
+        }
+
+        // 删除艺人
+        async function deleteArtist(id) {
+            if (!confirm('确定要删除这个艺人吗？')) return;
+
+            // 打开操作人确认模态框
+            openOperatorModal('delete', id);
+        }
+
+        // 查看艺人详情
+        async function viewArtistDetail(id) {
+            const modal = document.getElementById('artistDetailModal');
+            modal.classList.add('active');
+
+            // 获取艺人信息
+            const response = await fetch(`/api/artists/${id}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const artist = result.data;
+                currentArtistId = id;
+
+                // 基本信息
+                document.getElementById('detailBasicInfo').innerHTML = `
+                    <div class="info-item"><label>艺名</label> - <span>${artist.name || '-'}</span></div>
+                    <div class="info-item"><label>真名</label> - <span>${artist.real_name || '-'}</span></div>
+                    <div class="info-item"><label>抖音号</label> - <span>${artist.douyin_account || '-'}</span></div>
+                    <div class="info-item"><label>性别</label> - <span>${artist.gender || '-'}</span></div>
+                    <div class="info-item"><label>民族</label> - <span>${artist.ethnicity || '-'}</span></div>
+                    <div class="info-item"><label>职业</label> - <span>${artist.occupation || '-'}</span></div>
+                    <div class="info-item"><label>当前状态</label> - <span class="tag">${artist.current_status || '-'}</span></div>
+                    <div class="info-item"><label>签约类型</label> - <span>${artist.contract_type || '-'}</span></div>
+                    <div class="info-item"><label>加入日期</label> - <span>${formatDate(artist.join_date)}</span></div>
+                    <div class="info-item"><label>出生日期</label> - <span>${formatDate(artist.birth_date)}</span></div>
+                `;
+
+                // 联系方式
+                document.getElementById('detailContactInfo').innerHTML = `
+                    <div class="info-item"><label>手机号码</label> - <span>${artist.phone || '-'}</span></div>
+                    <div class="info-item"><label>微信号</label> - <span>${artist.wechat || '-'}</span></div>
+                    <div class="info-item"><label>现居住地</label> - <span>${artist.address || '-'}</span></div>
+                    <div class="info-item"><label>户籍地址</label> - <span>${artist.household_address || '-'}</span></div>
+                `;
+
+                // 招募信息
+                document.getElementById('detailRecruitmentInfo').innerHTML = `
+                    <div class="info-item"><label>招募人</label> - <span>${artist.recruiter || '-'}</span></div>
+                    <div class="info-item"><label>招募状态</label> - <span class="tag">${artist.recruitment_status || '-'}</span></div>
+                    <div class="info-item"><label>唱功</label> - <span>${artist.vocal_skill || '-'}</span></div>
+                    <div class="info-item"><label>直播效果</label> - <span>${artist.live_effect_level || '-'}</span></div>
+                `;
+
+                // 自动填充操作人
+                document.getElementById('followUpOperator').value = currentOperator || '未知用户';
+
+                // 加载跟进记录
+                loadFollowUps(id);
+            }
+        }
+
+        // 加载跟进记录（仅显示最新5条）
+        async function loadFollowUps(artistId) {
+            const response = await fetch(`/api/artists/${artistId}/follow-ups`);
+            const result = await response.json();
+
+            const timeline = document.getElementById('followUpTimeline');
+
+            if (result.success && result.data.length > 0) {
+                // 只取最新5条
+                const top5 = result.data.slice(0, 5);
+                timeline.innerHTML = top5.map(followUp => `
+                    <div class="timeline-item" data-id="${followUp.id}">
+                        <div class="timeline-content">
+                            <div class="timeline-operator">${followUp.operator || '未知'}</div>
+                            <div class="timeline-text">${followUp.content}</div>
+                            <div class="timeline-time">${formatDateTime(followUp.created_at)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                timeline.innerHTML = '<div class="no-logs">暂无跟进记录</div>';
+            }
+        }
+
+        // 添加跟进记录
+        async function addFollowUp() {
+            if (!currentArtistId) return;
+
+            const operator = document.getElementById('followUpOperator').value.trim();
+            const content = document.getElementById('newFollowUpContent').value.trim();
+            
+            if (!operator) {
+                alert('请输入操作人');
+                return;
+            }
+            if (!content) {
+                alert('请输入跟进记录内容');
+                return;
+            }
+
+            const response = await fetch(`/api/artists/${currentArtistId}/follow-ups`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: content,
+                    operator: operator
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('newFollowUpContent').value = '';
+                document.getElementById('followUpOperator').value = '';
+                loadFollowUps(currentArtistId);
+            } else {
+                alert('添加跟进记录失败');
+            }
+        }
+
+        // 关闭艺人详情模态框
+        function closeArtistDetailModal() {
+            const modal = document.getElementById('artistDetailModal');
+            modal.classList.remove('active');
+            currentArtistId = null;
+        }
+
+        // 打开批量上传模态框
+        function openBulkUploadModal() {
+            const modal = document.getElementById('bulkUploadModal');
+            modal.style.display = 'flex';
+        }
+
+        // 关闭批量上传模态框
+        function closeBulkUploadModal() {
+            const modal = document.getElementById('bulkUploadModal');
+            modal.style.display = 'none';
+        }
+
+        // 提交批量上传
+        async function submitBulkUpload() {
+            const fileInput = document.getElementById('bulkFile');
+            const operatorInput = document.getElementById('bulkOperator');
+            
+            if (!fileInput.files[0]) {
+                alert('请选择CSV文件');
+                return;
+            }
+            
+            if (!operatorInput.value.trim()) {
+                alert('请输入操作人姓名');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('operator', operatorInput.value.trim());
+            
+            try {
+                const response = await fetch('/api/artists/bulk', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(`批量上传成功，共处理 ${result.success_count} 条记录，失败 ${result.error_count} 条`);
+                    closeBulkUploadModal();
+                    loadArtists();
+                } else {
+                    alert(`批量上传失败: ${result.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('批量上传失败:', error);
+                alert('批量上传失败，请重试');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('artistForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const artistId = document.getElementById('artistId').value;
+            const formData = new FormData();
+            
+            // 获取文件上传控件
+            const fileInput = document.getElementById('singerAttachment');
+            
+            // 上传文件
+            let uploadedFiles = [];
+            if (fileInput.files.length > 0) {
+                const uploadFormData = new FormData();
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    uploadFormData.append('file', fileInput.files[i]);
+                }
+                
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: uploadFormData
+                });
+                
+                const uploadResult = await uploadResponse.json();
+                if (uploadResult.success) {
+                    uploadedFiles = uploadResult.files;
+                } else {
+                    alert('文件上传失败: ' + (uploadResult.error || '未知错误'));
+                    return;
+                }
+            }
+            
+            // 构建艺人数据
+            const addressProvince = document.getElementById('addressProvince').value;
+            const addressCity = document.getElementById('addressCity').value;
+            const householdProvince = document.getElementById('householdProvince').value;
+            const householdCity = document.getElementById('householdCity').value;
+            
+            const data = {
+                name: document.getElementById('name').value,
+                real_name: document.getElementById('realName').value,
+                douyin_account: document.getElementById('douyinAccount').value,
+                phone: document.getElementById('phone').value,
+                wechat: document.getElementById('wechat').value,
+                recruiter: document.getElementById('recruiter').value,
+                recruitment_status: document.getElementById('recruitmentStatus').value,
+                gender: document.getElementById('gender').value,
+                ethnicity: document.getElementById('ethnicity').value,
+                art_major: document.getElementById('artMajor').value,
+                vocal_skill: document.getElementById('vocalSkill').value,
+                live_effect_level: document.getElementById('liveEffectLevel').value,
+                total_revenue: document.getElementById('totalRevenue').value || 0,
+                current_status: document.getElementById('currentStatus').value,
+                singer_attachment: uploadedFiles.join(','),
+                address: `${addressProvince}${addressCity}`,
+                household_address: `${householdProvince}${householdCity}`,
+                willing_offline: document.getElementById('willingOffline').value,
+                exposure_parts: document.getElementById('exposureParts').value,
+                contract_type: document.getElementById('contractType').value,
+                remarks: document.getElementById('remarks').value,
+                join_date: document.getElementById('joinDate').value || null,
+                height: document.getElementById('height').value || null,
+                weight: document.getElementById('weight').value || null,
+                birth_date: document.getElementById('birthDate').value || null,
+                relationship_status: document.getElementById('relationshipStatus').value,
+                personality: document.getElementById('personality').value,
+                mbti: document.getElementById('mbti').value,
+                occupation: document.getElementById('occupation').value,
+                skills: document.getElementById('skills').value,
+                fan_name: document.getElementById('fanName').value,
+                music_style: document.getElementById('musicStyle').value,
+                expectation: document.getElementById('expectation').value,
+                bond: document.getElementById('bond').value
+            };
+
+            // 打开操作人确认模态框
+            const dataWithId = {...data, id: artistId};
+            openOperatorModal(artistId ? 'update' : 'create', dataWithId);
+        });
+
+        // 点击模态框外部关闭功能已禁用
+        // document.getElementById('artistModal').addEventListener('click', function(e) {
+        //     if (e.target === this) {
+        //         closeModal();
+        //     }
+        // });
+
+        // 添加事件委托，处理艺名点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 加载完成，添加事件委托');
+            const artistsList = document.getElementById('artistsList');
+            
+            // 确保元素存在
+            if (artistsList) {
+                console.log('找到了 artistsList 元素');
+                
+                // 添加点击事件监听器
+                artistsList.addEventListener('click', function(e) {
+                    console.log('点击事件被触发，目标元素:', e.target);
+                    const target = e.target;
+                    
+                    // 检查点击的元素是否是艺名单元格或其后代
+                    const artistNameElement = target.closest('.artist-name');
+                    console.log('artistNameElement:', artistNameElement);
+                    
+                    if (artistNameElement) {
+                        // 获取对应的艺人ID
+                        const tr = target.closest('tr');
+                        console.log('对应的 tr 元素:', tr);
+                        
+                        const artistId = parseInt(tr.dataset.id);
+                        console.log('获取到的艺人ID:', artistId);
+                        
+                        // 调用编辑函数
+                        console.log('调用 editArtist 函数');
+                        editArtist(artistId);
+                    }
+                });
+            } else {
+                console.error('未找到 artistsList 元素');
+            }
+        });
+        
+        // 页面加载时初始化
+        function initPage() {
+            // 加载艺人列表
+            loadArtists();
+            // 获取当前用户信息
+            getCurrentUser();
+        }
+        
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            // DOM已经加载完成，直接初始化
+            initPage();
+        }
+
+        // ========== 管理艺人项目功能 ==========
+        // 管理艺人项目
+        function manageArtistProjects(artistId) {
+            const modal = document.getElementById('manageProjectsModal');
+            document.getElementById('currentArtistId').value = artistId;
+            document.getElementById('manageProjectsTitle').textContent = `管理艺人项目`;
+            
+            // 显示已参与项目
+            showArtistProjects(artistId);
+            
+            modal.classList.add('active');
+        }
+
+        // 关闭管理项目模态框
+        function closeManageProjectsModal() {
+            const modal = document.getElementById('manageProjectsModal');
+            modal.classList.remove('active');
+        }
+
+        // 显示艺人已参与的项目
+        async function showArtistProjects(artistId) {
+            try {
+                const response = await fetch(`/api/artists/${artistId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const artist = result.data;
+                    const projectsList = document.getElementById('artistProjectsList');
+                    
+                    if (artist.projects && artist.projects.length > 0) {
+                        projectsList.innerHTML = artist.projects.map(project => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                <div>
+                                    <strong>${project.title}</strong>
+                                    <span style="margin-left: 10px; color: #667eea;">${project.type || '-'}</span>
+                                    ${project.release_date ? `<span style="margin-left: 10px; color: #666; font-size: 0.9rem;">${project.release_date}</span>` : ''}
+                                </div>
+                                <button class="btn btn-delete btn-small" onclick="removeArtistFromProject(${project.id}, ${artistId})")>移除</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        projectsList.innerHTML = '<p style="color: #95a5a6; font-style: italic;">暂无参与项目</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('加载艺人项目失败:', error);
+            }
+        }
+
+        // 搜索项目
+        async function searchProjects() {
+            const searchTerm = document.getElementById('projectSearch').value;
+            const resultsDiv = document.getElementById('projectSearchResults');
+            
+            if (!searchTerm.trim()) {
+                resultsDiv.innerHTML = '<p style="color: #95a5a6; font-style: italic;">请输入搜索关键词</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/projects`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const projects = result.data;
+                    const filteredProjects = projects.filter(project => 
+                        project.title.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    
+                    if (filteredProjects.length > 0) {
+                        resultsDiv.innerHTML = filteredProjects.map(project => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 8px; margin-bottom: 5px; border: 2px solid #e1e8ed;">
+                                <div>
+                                    <strong>${project.title}</strong>
+                                    <span style="margin-left: 10px; color: #667eea;">${project.type || '-'}</span>
+                                    ${project.release_date ? `<span style="margin-left: 10px; color: #666; font-size: 0.9rem;">${project.release_date}</span>` : ''}
+                                </div>
+                                <button class="btn btn-primary btn-small" onclick="addArtistToProject(${document.getElementById('currentArtistId').value}, ${project.id}, '${project.title}')">添加</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        resultsDiv.innerHTML = '<p style="color: #95a5a6; font-style: italic;">未找到匹配的项目</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('搜索项目失败:', error);
+                resultsDiv.innerHTML = '<p style="color: #ff4757; font-style: italic;">搜索失败，请重试</p>';
+            }
+        }
+
+        // 添加艺人到项目
+        async function addArtistToProject(artistId, projectId, projectName) {
+            try {
+                const response = await fetch('/api/artist-projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        artist_id: artistId,
+                        project_id: projectId,
+                        role: '',
+                        role_type: ''
+                    })
+                });
+                
+                if (response.ok) {
+                    // 重新显示已参与项目
+                    showArtistProjects(artistId);
+                    // 清空搜索结果
+                    document.getElementById('projectSearchResults').innerHTML = '';
+                    document.getElementById('projectSearch').value = '';
+                } else {
+                    const result = await response.json();
+                    alert('添加失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('添加项目失败:', error);
+                alert('添加失败，请重试');
+            }
+        }
+
+        // 从项目中移除艺人
+        async function removeArtistFromProject(projectId, artistId) {
+            if (!confirm('确定要移除该项目吗？')) {
+                return;
+            }
+            
+            try {
+                // 获取关联ID
+                const artistResponse = await fetch(`/api/artists/${artistId}`);
+                const artistResult = await artistResponse.json();
+                
+                if (artistResult.success) {
+                    const artistProject = artistResult.data.projects.find(p => p.id === projectId);
+                    if (artistProject && artistProject.id) {
+                        const response = await fetch(`/api/artist-projects/${artistProject.id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            // 重新显示已参与项目
+                            showArtistProjects(artistId);
+                        } else {
+                            const result = await response.json();
+                            alert('移除失败: ' + (result.error || '未知错误'));
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('移除项目失败:', error);
+                alert('移除失败，请重试');
+            }
+        }
+
+        // ========== 管理艺人活动功能 ==========
+        // 管理艺人活动
+        function manageArtistActivities(artistId) {
+            const modal = document.getElementById('manageActivitiesModal');
+            document.getElementById('currentArtistIdForActivities').value = artistId;
+            document.getElementById('manageActivitiesTitle').textContent = `管理艺人活动`;
+            
+            // 显示已参与活动
+            showArtistActivities(artistId);
+            
+            modal.classList.add('active');
+        }
+
+        // 关闭管理活动模态框
+        function closeManageActivitiesModal() {
+            const modal = document.getElementById('manageActivitiesModal');
+            modal.classList.remove('active');
+        }
+
+        // 显示艺人已参与的活动
+        async function showArtistActivities(artistId) {
+            try {
+                const response = await fetch(`/api/artists/${artistId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const artist = result.data;
+                    const activitiesList = document.getElementById('artistActivitiesList');
+                    
+                    if (artist.activities && artist.activities.length > 0) {
+                        activitiesList.innerHTML = artist.activities.map(activity => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                <div>
+                                    <strong>${activity.title}</strong>
+                                    <span style="margin-left: 10px; color: #fa709a;">${activity.type || '-'}</span>
+                                    ${activity.activity_date ? `<span style="margin-left: 10px; color: #666; font-size: 0.9rem;">${activity.activity_date}</span>` : ''}
+                                </div>
+                                <button class="btn btn-delete btn-small" onclick="removeArtistFromActivity(${activity.id}, ${artistId})")>移除</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        activitiesList.innerHTML = '<p style="color: #95a5a6; font-style: italic;">暂无参与活动</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('加载艺人活动失败:', error);
+            }
+        }
+
+        // 搜索活动
+        async function searchActivities() {
+            const searchTerm = document.getElementById('activitySearch').value;
+            const resultsDiv = document.getElementById('activitySearchResults');
+            
+            if (!searchTerm.trim()) {
+                resultsDiv.innerHTML = '<p style="color: #95a5a6; font-style: italic;">请输入搜索关键词</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/activities`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const activities = result.data;
+                    const filteredActivities = activities.filter(activity => 
+                        activity.title.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    
+                    if (filteredActivities.length > 0) {
+                        resultsDiv.innerHTML = filteredActivities.map(activity => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 8px; margin-bottom: 5px; border: 2px solid #e1e8ed;">
+                                <div>
+                                    <strong>${activity.title}</strong>
+                                    <span style="margin-left: 10px; color: #fa709a;">${activity.type || '-'}</span>
+                                    ${activity.activity_date ? `<span style="margin-left: 10px; color: #666; font-size: 0.9rem;">${activity.activity_date}</span>` : ''}
+                                </div>
+                                <button class="btn btn-primary btn-small" onclick="addArtistToActivity(${document.getElementById('currentArtistIdForActivities').value}, ${activity.id}, '${activity.title}')">添加</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        resultsDiv.innerHTML = '<p style="color: #95a5a6; font-style: italic;">未找到匹配的活动</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('搜索活动失败:', error);
+                resultsDiv.innerHTML = '<p style="color: #ff4757; font-style: italic;">搜索失败，请重试</p>';
+            }
+        }
+
+        // 添加艺人到活动
+        async function addArtistToActivity(artistId, activityId, activityName) {
+            try {
+                const response = await fetch('/api/artist-activities', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        artist_id: artistId,
+                        activity_id: activityId,
+                        role: '',
+                        performance_notes: ''
+                    })
+                });
+                
+                if (response.ok) {
+                    // 重新显示已参与活动
+                    showArtistActivities(artistId);
+                    // 清空搜索结果
+                    document.getElementById('activitySearchResults').innerHTML = '';
+                    document.getElementById('activitySearch').value = '';
+                } else {
+                    const result = await response.json();
+                    alert('添加失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('添加活动失败:', error);
+                alert('添加失败，请重试');
+            }
+        }
+
+        // 从活动中移除艺人
+        async function removeArtistFromActivity(activityId, artistId) {
+            if (!confirm('确定要移除该活动吗？')) {
+                return;
+            }
+            
+            try {
+                // 获取关联ID
+                const artistResponse = await fetch(`/api/artists/${artistId}`);
+                const artistResult = await artistResponse.json();
+                
+                if (artistResult.success) {
+                    const artistActivity = artistResult.data.activities.find(a => a.id === activityId);
+                    if (artistActivity && artistActivity.id) {
+                        const response = await fetch(`/api/artist-activities/${artistActivity.id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            // 重新显示已参与活动
+                            showArtistActivities(artistId);
+                        } else {
+                            const result = await response.json();
+                            alert('移除失败: ' + (result.error || '未知错误'));
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('移除活动失败:', error);
+                alert('移除失败，请重试');
+            }
+        }
+    </script>
+    
+    <!-- 页脚信息 -->
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+    <div class="footer">
+        Project Development: Dog&Clip 联系方式：【微信 imdc9475；电子邮箱 justin00654@163.com】
+    </div>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艺人管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .artists-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .projects-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .search-card {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .activities-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .artists-card h2,
+        .projects-card h2,
+        .search-card h2,
+        .activities-card h2 {
+            color: white;
+        }
+
+        .artists-card p,
+        .projects-card p,
+        .search-card p,
+        .activities-card p {
+            color: rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>听潮阁-事业一部-艺人信息系统</h1>
+            <p>管理艺人信息、项目资料及关联查询</p>
+        </div>
+
+        <div class="cards">
+            <a href="/artists" class="card artists-card">
+                <div class="card-icon">🎭</div>
+                <h2>艺人管理</h2>
+                <p>新增、编辑、删除艺人信息，管理艺人个人资料</p>
+            </a>
+
+            <a href="/projects" class="card projects-card">
+                <div class="card-icon">🎬</div>
+                <h2>项目管理</h2>
+                <p>维护电影、电视剧、音乐等项目信息</p>
+            </a>
+
+            <a href="/search" class="card search-card">
+                <div class="card-icon">🔍</div>
+                <h2>关联查询</h2>
+                <p>通过项目/活动查找艺人，或通过艺人查找项目/活动</p>
+            </a>
+
+            <a href="/activities" class="card activities-card">
+                <div class="card-icon">📅</div>
+                <h2>活动管理</h2>
+                <p>管理艺人参与的活动信息，支持多选关联</p>
+            </a>
+
+            <a href="/tickets" class="card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-icon">🎫</div>
+                <h2>工单管理</h2>
+                <p>创建、管理和追踪工单，实现完整的工单生命周期管理</p>
+            </a>
+
+            <a href="/schedule" class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-icon">📅</div>
+                <h2>行程管理</h2>
+                <p>管理艺人行程，查看月度行程日历，检测行程冲突</p>
+            </a>
+
+            <!-- 管理员选项卡，动态显示 -->
+            <a id="adminCard" href="/users" class="card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; display: none;">
+                <div class="card-icon">👑</div>
+                <h2>管理员管理</h2>
+                <p>管理系统用户，新建、编辑、删除账户</p>
+            </a>
+        </div>
+        
+        <!-- 检查用户身份，显示管理员选项卡 -->
+        <script>
+            // 获取当前用户信息
+            fetch('/api/current-user')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return { is_admin: false };
+                })
+                .then(function(user) {
+                    if (user.is_admin) {
+                        document.getElementById('adminCard').style.display = 'block';
+                    }
+                })
+                .catch(function(error) {
+                    console.error('获取用户信息失败:', error);
+                });
+        </script>
+    </div>
+    
+    <!-- 页脚信息 -->
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+    <div class="footer">
+        Project Development: Dog&Clip 联系方式：【微信 imdc9475；电子邮箱 justin00654@163.com】
+    </div>
+</body>
+</html>

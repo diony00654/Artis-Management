@@ -1,0 +1,103 @@
+# 日志文件
+app.log
+db_error.log
+test_app.log
+logs/
+
+# 临时文件
+.DS_Store
+cookies.txt
+
+# Node.js依赖
+node_modules/
+package-lock.json
+
+# PID文件
+app.pid
+
+# 备份文件
+备份/
+
+# 服务配置文件
+*.service
+supervisor.conf
+
+# 部署脚本
+non_docker_deploy.sh
+simple_deploy.sh
+boot_start.sh
+restart_service.sh
+start.sh
+manage_mariadb.sh
+auto_backup.sh
+create_backup.sh
+temp_backup.sh
+crontab.conf
+
+# 环境特定目录
+.trae/
+
+# 测试文件
+test_local.sh
+test_smb_mount.sh
+
+# 类型定义目录
+types/
+
+# 组件目录
+components/
+
+# 开发环境配置
+.env
+.env.local
+.env.*.local
+
+# IDE配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 编译输出
+dist/
+build/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+
+# 其他临时文件
+*.tmp
+*.temp
+*.bak
+
+# 敏感信息文件
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+
+# Python编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+venv/
+.env/
+.venv/
+env/
+
+# 其他
+*.log
+*.pid
+*.seed
+*.pid.lock
